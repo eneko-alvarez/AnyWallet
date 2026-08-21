@@ -1,0 +1,16 @@
+{
+  "name": "anywallet",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "server"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace server run dev",
+    "test": "npm --workspace server test",
+    "typecheck": "npm --workspace server run typecheck"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}

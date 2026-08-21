@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+*.p12
+*.pem
+*.cer
+*.key
+*.pkpass
+server/tmp/
+server/fixtures/generated/
+ios/AnyWallet.xcodeproj/
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+*.xcuserstate
