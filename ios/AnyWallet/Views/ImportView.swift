@@ -86,11 +86,12 @@ struct ImportView: View {
 
     private var brand: some View {
         HStack(spacing: 10) {
-            Image(systemName: "wallet.pass.fill")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
+            Image("BrandMark")
+                .renderingMode(.original)
+                .resizable()
+                .scaledToFit()
                 .frame(width: 34, height: 34)
-                .background(.black, in: RoundedRectangle(cornerRadius: 8))
+                .accessibilityHidden(true)
             Text("AnyWallet")
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(AppTheme.ink)
