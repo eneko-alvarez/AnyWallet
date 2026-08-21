@@ -1,0 +1,17 @@
+.git
+.gitignore
+node_modules
+server/node_modules
+server/.env*
+!server/.env.example
+server/certs
+server/data
+server/dist
+ios/DerivedData
+ios/AnyWallet.xcodeproj
+*.p12
+*.pem
+*.cer
+*.csr
+*.key
+*.mobileprovision

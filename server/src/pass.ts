@@ -13,7 +13,7 @@ export function signingIsConfigured(): boolean {
 
 export function buildPassMetadata(draft: PassDraft, serialNumber: string = randomUUID()) {
   const relevantDate = draft.relevantDate ? new Date(draft.relevantDate).toISOString() : undefined;
-  return {
+  const common = {
     formatVersion: 1 as const,
     serialNumber,
     passTypeIdentifier: config.PASS_TYPE_IDENTIFIER,
@@ -24,6 +24,32 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
     backgroundColor: draft.backgroundColor,
     foregroundColor: "rgb(255, 255, 255)",
     labelColor: "rgb(226, 232, 240)",
+  };
+
+  if (draft.passKind === "membership") {
+    return {
+      ...common,
+      expirationDate: relevantDate,
+      storeCard: {
+        headerFields: draft.memberNumber ? [{ key: "memberNumber", label: "N.º DE SOCIO", value: draft.memberNumber }] : [],
+        primaryFields: [{ key: "title", label: "MEMBRESÍA", value: draft.title }],
+        secondaryFields: draft.issuer ? [{ key: "issuer", label: "PROGRAMA", value: draft.issuer }] : [],
+        auxiliaryFields: draft.memberName ? [{ key: "memberName", label: "TITULAR", value: draft.memberName }] : [],
+        backFields: [
+          ...(draft.issuer ? [{ key: "issuerDetail", label: "Comercio o programa original", value: draft.issuer }] : []),
+          {
+            key: "notice",
+            label: "Aviso",
+            value: "Pase personal creado a partir de una tarjeta del usuario. No está emitido ni respaldado por el comercio original.",
+          },
+          { key: "contact", label: "Emisor del pase", value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
+        ],
+      },
+    };
+  }
+
+  return {
+    ...common,
     relevantDate,
     relevantDates: relevantDate ? [{ relevantDate }] : undefined,
     generic: {
@@ -39,7 +65,6 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
       ],
       backFields: [
         ...(draft.issuer ? [{ key: "issuer", label: "Operador original", value: draft.issuer }] : []),
-        { key: "source", label: "Documento de origen", value: draft.sourceFilename },
         {
           key: "notice",
           label: "Aviso",
@@ -49,6 +74,15 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
       ],
     },
   };
+}
+
+export function walletBarcodeFormat(format: PassDraft["barcodeFormat"]): string {
+  switch (format) {
+    case "qr": return "PKBarcodeFormatQR";
+    case "code128": return "PKBarcodeFormatCode128";
+    case "pdf417": return "PKBarcodeFormatPDF417";
+    case "aztec": return "PKBarcodeFormatAztec";
+  }
 }
 
 function signManifest(manifest: Buffer): Promise<Buffer> {
@@ -114,8 +148,8 @@ export async function createSignedPass(draft: PassDraft): Promise<Buffer> {
     ...buildPassMetadata(draft),
     barcodes: [
       {
-        format: "PKBarcodeFormatQR",
-        message: Buffer.from(draft.qrPayloadBase64, "base64").toString("latin1"),
+        format: walletBarcodeFormat(draft.barcodeFormat),
+        message: Buffer.from(draft.barcodePayloadBase64, "base64").toString("latin1"),
         messageEncoding: "iso-8859-1",
       },
     ],

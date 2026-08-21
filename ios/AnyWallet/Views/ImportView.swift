@@ -1,70 +1,100 @@
+import PhotosUI
 import SwiftUI
 
 struct ImportView: View {
     let isAnalyzing: Bool
-    let onImport: () -> Void
+    @Binding var selectedPhoto: PhotosPickerItem?
+    let onImportFile: () -> Void
+
+    @State private var isSourceDialogPresented = false
+    @State private var isPhotoPickerPresented = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 10) {
-                    Image(systemName: "wallet.pass.fill")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(AppTheme.ink, in: RoundedRectangle(cornerRadius: 8))
-                    Text("AnyWallet")
-                        .font(.title3.bold())
-                        .foregroundStyle(AppTheme.ink)
-                }
+        VStack(spacing: 0) {
+            brand
 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("NUEVO PASE")
-                        .font(.caption.bold())
-                        .foregroundStyle(AppTheme.accent)
-                    Text("Tu billete, listo en Wallet.")
-                        .font(.system(size: 38, weight: .bold))
-                        .foregroundStyle(AppTheme.ink)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.top, 72)
+            Spacer(minLength: 44)
 
-                Button(action: onImport) {
-                    VStack(spacing: 16) {
-                        Image(systemName: "doc.badge.plus")
-                            .font(.system(size: 27, weight: .medium))
-                            .foregroundStyle(AppTheme.accent)
-                            .frame(width: 54, height: 54)
-                            .background(AppTheme.accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
-                        VStack(spacing: 7) {
-                            Text(isAnalyzing ? "Analizando el billete…" : "Seleccionar PDF")
-                                .font(.headline)
-                                .foregroundStyle(AppTheme.ink)
-                            Text("Hasta 15 MB · 12 páginas")
-                                .font(.footnote)
-                                .foregroundStyle(AppTheme.muted)
+            VStack(spacing: 22) {
+                Image("WalletIcon")
+                    .renderingMode(.original)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 76, height: 76)
+                    .accessibilityHidden(true)
+
+                VStack(spacing: 10) {
+                    Text("Crea tu próximo pase.")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(AppTheme.ink)
+                        .multilineTextAlignment(.center)
+
+                    Text("Billetes y tarjetas, listos para Apple Wallet.")
+                        .font(.system(size: 17))
+                        .foregroundStyle(AppTheme.muted)
+                        .multilineTextAlignment(.center)
+                }
+            }
+
+            Spacer(minLength: 52)
+
+            VStack(spacing: 18) {
+                Button {
+                    isSourceDialogPresented = true
+                } label: {
+                    HStack(spacing: 9) {
+                        if isAnalyzing {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "plus")
+                                .fontWeight(.semibold)
                         }
+                        Text(isAnalyzing ? "Analizando…" : "Crear pase")
+                            .font(.system(size: 17, weight: .semibold))
                     }
-                    .frame(maxWidth: .infinity, minHeight: 210)
-                    .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 8))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(AppTheme.line, style: StrokeStyle(lineWidth: 1.5, dash: [7]))
-                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                    .background(.black, in: RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
                 .disabled(isAnalyzing)
-                .padding(.top, 42)
 
-                Label("El documento se analiza en este iPhone y no se sube.", systemImage: "lock.fill")
+                Label("El archivo se analiza en este iPhone", systemImage: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(AppTheme.muted)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 18)
             }
-            .padding(.horizontal, 22)
-            .padding(.top, 16)
-            .padding(.bottom, 36)
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 14)
+        .padding(.bottom, 24)
+        .background(Color.white.ignoresSafeArea())
+        .confirmationDialog(
+            "Seleccionar origen",
+            isPresented: $isSourceDialogPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Fotos") { isPhotoPickerPresented = true }
+            Button("Archivos") { onImportFile() }
+            Button("Cancelar", role: .cancel) {}
+        }
+        .photosPicker(
+            isPresented: $isPhotoPickerPresented,
+            selection: $selectedPhoto,
+            matching: .images
+        )
+    }
+
+    private var brand: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "wallet.pass.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 34, height: 34)
+                .background(.black, in: RoundedRectangle(cornerRadius: 8))
+            Text("AnyWallet")
+                .font(.system(size: 19, weight: .bold))
+                .foregroundStyle(AppTheme.ink)
+            Spacer()
         }
     }
 }

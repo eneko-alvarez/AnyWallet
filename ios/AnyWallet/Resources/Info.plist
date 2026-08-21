@@ -39,11 +39,17 @@
         <string>UIInterfaceOrientationPortrait</string>
     </array>
     <key>APIBaseURL</key>
-    <string>http://localhost:8787</string>
+    <string>$(API_BASE_URL)</string>
+    <key>AppAttestRequired</key>
+    <string>$(APP_ATTEST_REQUIRED)</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+#if ALLOW_INSECURE_HTTP
     <key>NSAppTransportSecurity</key>
     <dict>
-        <key>NSAllowsLocalNetworking</key>
+        <key>NSAllowsArbitraryLoads</key>
         <true/>
     </dict>
+#endif
 </dict>
 </plist>

@@ -1,8 +1,8 @@
 # AnyWallet
 
-App iOS nativa para convertir billetes PDF con QR en pases personales de Apple Wallet.
+App iOS nativa para convertir billetes y tarjetas de membresía en pases personales de Apple Wallet.
 
-El PDF se analiza completamente en el iPhone mediante PDFKit y Vision. El servidor recibe únicamente los campos finales y los bytes del QR, firma el `.pkpass` y entrega un enlace de descarga de un solo uso.
+El PDF o la imagen se analiza completamente en el iPhone mediante PDFKit y Vision. El servidor recibe únicamente los campos finales, el tipo de pase y los bytes del código, firma el `.pkpass` y entrega un enlace de descarga de un solo uso.
 
 ## Estructura
 
@@ -49,11 +49,11 @@ cp server/.env.example server/.env
 npm run dev:server
 ```
 
-La URL del API está en `ios/AnyWallet/Resources/Info.plist`, clave `APIBaseURL`.
+La URL del API se inyecta mediante el build setting `API_BASE_URL` y termina en la clave `APIBaseURL` del bundle.
 
 - Simulador: `http://localhost:8787`
 - iPhone físico: usa la IP LAN del Mac, por ejemplo `http://192.168.1.20:8787`
-- Producción: usa siempre HTTPS.
+- Producción: usa siempre HTTPS. Release no incluye excepciones ATS y exige App Attest.
 
 En el iPhone físico, `PUBLIC_BASE_URL` en `server/.env` debe usar la misma IP LAN o dominio HTTPS. El valor `localhost` apuntaría al propio iPhone y rompería la descarga del pase.
 
@@ -95,14 +95,58 @@ npm audit --omit=dev
 curl http://localhost:8787/health
 ```
 
-`signingConfigured` será `false` hasta configurar el certificado real. El API no simula un pase válido cuando faltan esas credenciales.
+El health check público devuelve únicamente `{ "ok": true }`; no revela si los certificados están configurados. El API tampoco simula un pase válido cuando faltan credenciales de firma.
+
+## Despliegue público seguro
+
+La imagen de producción se construye desde la raíz del repositorio:
+
+```bash
+docker build -t anywallet-api .
+```
+
+Configura el proveedor con TLS administrado, un volumen persistente montado en `/app/server/data` y los secretos del certificado fuera de la imagen. Variables obligatorias de producción:
+
+```dotenv
+NODE_ENV=production
+PORT=8787
+PUBLIC_BASE_URL=https://api.tudominio.com
+TRUST_PROXY=true
+APP_BUNDLE_IDENTIFIER=com.eneko.anywallet
+APP_ATTEST_REQUIRED=true
+APP_ATTEST_ALLOW_DEVELOPMENT=false
+APP_ATTEST_DATABASE_PATH=/app/server/data/app-attest.sqlite
+APPLE_TEAM_IDENTIFIER=TU_TEAM_ID
+PASS_TYPE_IDENTIFIER=pass.com.tudominio.anywallet
+PASS_ORGANIZATION_NAME=AnyWallet
+PASS_CONTACT_EMAIL=soporte@tudominio.com
+PASS_SIGNER_CERT_PATH=/run/secrets/signerCert.pem
+PASS_SIGNER_KEY_PATH=/run/secrets/signerKey.pem
+PASS_WWDR_CERT_PATH=/run/secrets/wwdr.pem
+PASS_SIGNER_KEY_PASSPHRASE=GESTOR_DE_SECRETOS
+```
+
+El puerto `8787` no debe quedar expuesto directamente a Internet; solo el proxy HTTPS debe alcanzarlo. Mantén una sola réplica hasta mover también los borradores temporales a un almacén compartido.
+
+Para archivar iOS, sustituye el dominio inválido de seguridad incluido en Release:
+
+```bash
+xcodebuild archive \
+  -project ios/AnyWallet.xcodeproj \
+  -scheme AnyWallet \
+  -configuration Release \
+  API_BASE_URL=https://api.tudominio.com
+```
+
+Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.anywallet`, confirma que el perfil de distribución contiene el entitlement y publica `PRIVACY.md` en una URL HTTPS. Apple exige una URL de política de privacidad y declarar las prácticas de datos en App Store Connect.
 
 ## Límites
 
-- PDF máximo: 15 MB y 12 páginas, comprobado localmente.
-- QR máximo: 4 KB. Si hay varios, el usuario debe elegir uno.
+- Archivo máximo: 15 MB. Los PDF admiten hasta 12 páginas y las imágenes hasta 40 megapíxeles.
+- Código QR, Code 128, PDF417 o Aztec de hasta 4 KB. Si hay varios, el usuario debe elegir uno.
 - OCR local en español e inglés para documentos escaneados.
-- Los campos detectados son sugerencias editables y el título es obligatorio.
-- El PDF nunca se envía al servidor.
+- El tipo y los campos detectados son sugerencias editables; el usuario puede cambiar entre viaje y membresía.
+- El PDF o la imagen nunca se envía al servidor.
 - El servidor limita el JSON a 64 KB y elimina el borrador tras la primera descarga o a los 10 minutos.
 - El pase identifica a AnyWallet como firmante y al transportista únicamente como operador original.
+- En producción, crear un pase requiere una clave App Attest válida y una aserción nueva para cada petición.

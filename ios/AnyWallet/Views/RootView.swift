@@ -1,35 +1,53 @@
+import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
 struct RootView: View {
     @StateObject private var model = AppViewModel()
     @State private var isImporterPresented = false
+    @State private var selectedPhoto: PhotosPickerItem?
 
     var body: some View {
         ZStack {
             AppTheme.canvas.ignoresSafeArea()
             if model.analysis == nil {
-                ImportView(isAnalyzing: model.isAnalyzing) {
-                    isImporterPresented = true
-                }
+                ImportView(
+                    isAnalyzing: model.isAnalyzing,
+                    selectedPhoto: $selectedPhoto,
+                    onImportFile: { isImporterPresented = true }
+                )
             } else {
                 TicketEditorView(model: model)
             }
 
             if model.isAnalyzing {
-                LoadingOverlay(label: "Analizando el billete")
+                LoadingOverlay(label: "Analizando el pase")
             }
         }
         .fileImporter(
             isPresented: $isImporterPresented,
-            allowedContentTypes: [.pdf],
+            allowedContentTypes: [.pdf, .image],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
-                if let url = urls.first { model.importPDF(from: url) }
+                if let url = urls.first { model.importFile(from: url) }
             case .failure(let error):
                 model.errorMessage = error.localizedDescription
+            }
+        }
+        .onChange(of: selectedPhoto) { _, item in
+            guard let item else { return }
+            Task {
+                do {
+                    guard let data = try await item.loadTransferable(type: Data.self) else {
+                        throw AnyWalletError.invalidDocument
+                    }
+                    model.importImage(data: data)
+                } catch {
+                    model.errorMessage = error.localizedDescription
+                }
+                selectedPhoto = nil
             }
         }
         .alert(
@@ -44,7 +62,9 @@ struct RootView: View {
             Text(model.errorMessage ?? "Error desconocido")
         }
         .sheet(item: $model.pendingWalletPass) { pending in
-            WalletPassSheet(data: pending.data)
+            WalletPassSheet(data: pending.data) {
+                model.reset()
+            }
         }
     }
 }

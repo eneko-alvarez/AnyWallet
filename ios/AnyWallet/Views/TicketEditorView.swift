@@ -8,27 +8,32 @@ struct TicketEditorView: View {
             header
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    PassPreviewView(fields: model.fields, qrCode: model.selectedQRCode, passColor: model.passColor)
+                    PassPreviewView(
+                        passKind: model.passKind,
+                        fields: model.fields,
+                        barcode: model.selectedBarcode,
+                        passColor: model.passColor
+                    )
+
+                    passKindSection
 
                     if let analysis = model.analysis {
                         ForEach(analysis.warnings, id: \.self) { warning in
-                            WarningView(text: warning, isError: analysis.qrCandidates.isEmpty)
+                            WarningView(text: warning, isError: analysis.barcodeCandidates.isEmpty)
                         }
-                        qrSection(analysis.qrCandidates)
+                        barcodeSection(analysis.barcodeCandidates)
                     }
 
                     fieldsSection
                     colorSection
 
-                    PrimaryButton(
-                        label: "Crear pase",
-                        systemImage: "wallet.pass",
+                    AddToWalletButton(
                         isLoading: model.isCreatingPass,
                         isDisabled: !model.canCreatePass,
                         action: model.createPass
                     )
 
-                    Text("Pase personal. Conserva el PDF original para cualquier comprobación.")
+                    Text("Pase personal. Conserva el archivo original para cualquier comprobación.")
                         .font(.caption)
                         .foregroundStyle(AppTheme.muted)
                         .multilineTextAlignment(.center)
@@ -73,11 +78,26 @@ struct TicketEditorView: View {
         .overlay(alignment: .bottom) { Divider() }
     }
 
-    private func qrSection(_ candidates: [QRCodeCandidate]) -> some View {
+    private var passKindSection: some View {
         VStack(alignment: .leading, spacing: 13) {
-            Text("Código QR").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+            Text("Tipo de pase").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+            Picker("Tipo de pase", selection: Binding(
+                get: { model.passKind },
+                set: model.selectPassKind
+            )) {
+                ForEach(PassKind.allCases) { kind in
+                    Text(kind.title).tag(kind)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+
+    private func barcodeSection(_ candidates: [BarcodeCandidate]) -> some View {
+        VStack(alignment: .leading, spacing: 13) {
+            Text("Código").font(.title3.bold()).foregroundStyle(AppTheme.ink)
             if candidates.isEmpty {
-                Label("Necesitas otro PDF con un QR legible.", systemImage: "qrcode")
+                Label("Necesitas otro archivo con un código QR o de barras legible.", systemImage: "barcode.viewfinder")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.danger)
                     .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
@@ -88,12 +108,12 @@ struct TicketEditorView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
-                            QRCodeChoice(
+                            BarcodeChoice(
                                 candidate: candidate,
                                 index: index,
-                                isSelected: candidate.id == model.selectedQRCodeID
+                                isSelected: candidate.id == model.selectedBarcodeID
                             ) {
-                                model.selectedQRCodeID = candidate.id
+                                model.selectedBarcodeID = candidate.id
                             }
                         }
                     }
@@ -105,16 +125,27 @@ struct TicketEditorView: View {
     private var fieldsSection: some View {
         VStack(alignment: .leading, spacing: 13) {
             Text("Datos del pase").font(.title3.bold()).foregroundStyle(AppTheme.ink)
-            LabeledField(label: "Título", placeholder: "Mi billete", text: $model.fields.title)
-            HStack(alignment: .top, spacing: 10) {
-                LabeledField(label: "Origen", placeholder: "Origen", text: $model.fields.origin)
-                LabeledField(label: "Destino", placeholder: "Destino", text: $model.fields.destination)
-            }
-            DateField(date: $model.fields.relevantDate)
-            LabeledField(label: "Viajero", placeholder: "Opcional", text: $model.fields.passenger)
-            HStack(alignment: .top, spacing: 10) {
-                LabeledField(label: "Operador", placeholder: "Opcional", text: $model.fields.issuer)
-                LabeledField(label: "Referencia", placeholder: "Opcional", text: $model.fields.reference)
+            LabeledField(
+                label: "Título",
+                placeholder: model.passKind == .travel ? "Mi billete" : "Mi membresía",
+                text: $model.fields.title
+            )
+            if model.passKind == .travel {
+                HStack(alignment: .top, spacing: 10) {
+                    LabeledField(label: "Origen", placeholder: "Origen", text: $model.fields.origin)
+                    LabeledField(label: "Destino", placeholder: "Destino", text: $model.fields.destination)
+                }
+                DateField(label: "Fecha y hora", pickerLabel: "Fecha del viaje", date: $model.fields.relevantDate)
+                LabeledField(label: "Viajero", placeholder: "Opcional", text: $model.fields.passenger)
+                HStack(alignment: .top, spacing: 10) {
+                    LabeledField(label: "Operador", placeholder: "Opcional", text: $model.fields.issuer)
+                    LabeledField(label: "Referencia", placeholder: "Opcional", text: $model.fields.reference)
+                }
+            } else {
+                LabeledField(label: "Comercio o programa", placeholder: "Ej. Lidl Plus", text: $model.fields.issuer)
+                LabeledField(label: "Titular", placeholder: "Opcional", text: $model.fields.memberName)
+                LabeledField(label: "Número de socio", placeholder: "Opcional", text: $model.fields.memberNumber)
+                DateField(label: "Fecha de caducidad", pickerLabel: "Caducidad", date: $model.fields.relevantDate)
             }
         }
     }
@@ -168,11 +199,13 @@ private struct LabeledField: View {
 }
 
 private struct DateField: View {
+    let label: String
+    let pickerLabel: String
     @Binding var date: Date?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Toggle("Fecha y hora", isOn: Binding(
+            Toggle(label, isOn: Binding(
                 get: { date != nil },
                 set: { enabled in date = enabled ? (date ?? Date()) : nil }
             ))
@@ -181,7 +214,7 @@ private struct DateField: View {
 
             if date != nil {
                 DatePicker(
-                    "Fecha del viaje",
+                    pickerLabel,
                     selection: Binding(get: { date ?? Date() }, set: { date = $0 }),
                     displayedComponents: [.date, .hourAndMinute]
                 )
@@ -196,8 +229,8 @@ private struct DateField: View {
     }
 }
 
-private struct QRCodeChoice: View {
-    let candidate: QRCodeCandidate
+private struct BarcodeChoice: View {
+    let candidate: BarcodeCandidate
     let index: Int
     let isSelected: Bool
     let action: () -> Void
@@ -208,9 +241,10 @@ private struct QRCodeChoice: View {
                 Image(uiImage: candidate.preview)
                     .interpolation(.none)
                     .resizable()
-                    .frame(width: 70, height: 70)
+                    .scaledToFit()
+                    .frame(width: 82, height: 70)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("QR \(index + 1)").font(.subheadline.bold()).foregroundStyle(AppTheme.ink)
+                    Text("\(candidate.format.title) \(index + 1)").font(.subheadline.bold()).foregroundStyle(AppTheme.ink)
                     Text("Página \(candidate.page) · \(candidate.byteLength) bytes")
                         .font(.caption2).foregroundStyle(AppTheme.muted)
                     if let value = candidate.readableValue {
@@ -248,26 +282,35 @@ private struct WarningView: View {
     }
 }
 
-private struct PrimaryButton: View {
-    let label: String
-    let systemImage: String
+private struct AddToWalletButton: View {
     let isLoading: Bool
     let isDisabled: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 10) {
-                if isLoading { ProgressView().tint(.white) }
-                else { Image(systemName: systemImage) }
-                Text(label).fontWeight(.bold)
+            HStack(spacing: 12) {
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                        .frame(width: 32, height: 32)
+                } else {
+                    Image("WalletIcon")
+                        .renderingMode(.original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 32, height: 32)
+                }
+                Text(isLoading ? "Preparando pase…" : "Añadir a Apple Wallet")
+                    .font(.system(size: 17, weight: .semibold))
             }
             .foregroundStyle(.white)
-            .frame(maxWidth: .infinity, minHeight: 54)
-            .background(AppTheme.accent, in: RoundedRectangle(cornerRadius: 8))
+            .frame(maxWidth: .infinity, minHeight: 56)
+            .background(.black, in: RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.45 : 1)
+        .accessibilityLabel(isLoading ? "Preparando pase" : "Añadir a Apple Wallet")
     }
 }

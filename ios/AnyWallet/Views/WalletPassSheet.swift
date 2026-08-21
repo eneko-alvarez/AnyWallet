@@ -4,9 +4,13 @@ import SwiftUI
 struct WalletPassSheet: UIViewControllerRepresentable {
     @Environment(\.dismiss) private var dismiss
     let data: Data
+    let onFinish: () -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator { dismiss() }
+        Coordinator {
+            dismiss()
+            onFinish()
+        }
     }
 
     func makeUIViewController(context: Context) -> UIViewController {

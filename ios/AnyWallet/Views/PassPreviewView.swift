@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct PassPreviewView: View {
+    let passKind: PassKind
     let fields: TicketFields
-    let qrCode: QRCodeCandidate?
+    let barcode: BarcodeCandidate?
     let passColor: PassColor
 
     var body: some View {
@@ -11,10 +12,12 @@ struct PassPreviewView: View {
                 HStack {
                     Text("AnyWallet").font(.headline.bold())
                     Spacer()
-                    Text(fields.reference).font(.caption.bold()).lineLimit(1)
+                    Text(passKind == .travel ? fields.reference : fields.memberNumber)
+                        .font(.caption.bold())
+                        .lineLimit(1)
                 }
 
-                Text("BILLETE PERSONAL")
+                Text(passKind == .travel ? "BILLETE PERSONAL" : "TARJETA DE MEMBRESÍA")
                     .font(.caption2.bold())
                     .foregroundStyle(.white.opacity(0.72))
                     .padding(.top, 18)
@@ -25,12 +28,17 @@ struct PassPreviewView: View {
                     .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
                     .padding(.top, 5)
 
-                HStack(alignment: .bottom, spacing: 10) {
-                    place(label: "ORIGEN", value: fields.origin, isTrailing: false)
-                    Image(systemName: "location.fill").font(.footnote).foregroundStyle(.white.opacity(0.82))
-                    place(label: "DESTINO", value: fields.destination, isTrailing: true)
+                if passKind == .travel {
+                    HStack(alignment: .bottom, spacing: 10) {
+                        place(label: "ORIGEN", value: fields.origin, isTrailing: false)
+                        Image(systemName: "location.fill").font(.footnote).foregroundStyle(.white.opacity(0.82))
+                        place(label: "DESTINO", value: fields.destination, isTrailing: true)
+                    }
+                    .padding(.bottom, 19)
+                } else {
+                    place(label: "PROGRAMA", value: fields.issuer, isTrailing: false)
+                        .padding(.bottom, 19)
                 }
-                .padding(.bottom, 19)
             }
             .padding(.horizontal, 18)
             .padding(.top, 18)
@@ -38,21 +46,22 @@ struct PassPreviewView: View {
 
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("FECHA Y HORA").font(.caption2.bold()).foregroundStyle(AppTheme.muted)
-                    Text(fields.relevantDate?.formatted(date: .abbreviated, time: .shortened) ?? "Sin fecha")
+                    Text(passKind == .travel ? "FECHA Y HORA" : "TITULAR").font(.caption2.bold()).foregroundStyle(AppTheme.muted)
+                    Text(primaryDetail)
                         .font(.subheadline.bold()).foregroundStyle(AppTheme.ink)
-                    if !fields.passenger.isEmpty {
-                        Text(fields.passenger).font(.caption).foregroundStyle(AppTheme.muted).lineLimit(1).padding(.top, 4)
+                    if !secondaryDetail.isEmpty {
+                        Text(secondaryDetail).font(.caption).foregroundStyle(AppTheme.muted).lineLimit(1).padding(.top, 4)
                     }
                 }
                 Spacer()
-                if let qrCode {
-                    Image(uiImage: qrCode.preview)
+                if let barcode {
+                    Image(uiImage: barcode.preview)
                         .interpolation(.none)
                         .resizable()
-                        .frame(width: 84, height: 84)
+                        .scaledToFit()
+                        .frame(width: 116, height: 84)
                 } else {
-                    Rectangle().fill(AppTheme.line).frame(width: 84, height: 84)
+                    Rectangle().fill(AppTheme.line).frame(width: 116, height: 84)
                 }
             }
             .padding(16)
@@ -62,6 +71,20 @@ struct PassPreviewView: View {
         .background(passColor.color)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .combine)
+    }
+
+    private var primaryDetail: String {
+        if passKind == .membership {
+            return fields.memberName.isEmpty ? "Sin titular" : fields.memberName
+        }
+        return fields.relevantDate?.formatted(date: .abbreviated, time: .shortened) ?? "Sin fecha"
+    }
+
+    private var secondaryDetail: String {
+        if passKind == .membership {
+            return fields.memberNumber.isEmpty ? "" : "N.º \(fields.memberNumber)"
+        }
+        return fields.passenger
     }
 
     private func place(label: String, value: String, isTrailing: Bool) -> some View {

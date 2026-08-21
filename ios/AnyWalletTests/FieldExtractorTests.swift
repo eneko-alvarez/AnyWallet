@@ -26,18 +26,37 @@ final class FieldExtractorTests: XCTestCase {
         XCTAssertEqual(fields.title, "mi billete")
     }
 
+    func testSuggestsMembershipAndExtractsMemberFields() {
+        let text = """
+        Lidl Plus
+        Titular: Ane Lopez
+        Número de socio: 204938102
+        """
+        let fields = FieldExtractor.extract(filename: "lidl-plus.png", text: text)
+
+        XCTAssertEqual(fields.memberName, "Ane Lopez")
+        XCTAssertEqual(fields.memberNumber, "204938102")
+        XCTAssertEqual(
+            FieldExtractor.suggestedPassKind(filename: "lidl-plus.png", text: text, fields: fields),
+            .membership
+        )
+    }
+
     func testDraftEncodesMissingDateAsNull() throws {
         let draft = PassDraft(
+            passKind: .membership,
             title: "Billete",
             issuer: "",
             origin: "",
             destination: "",
             passenger: "",
             reference: "",
+            memberName: "",
+            memberNumber: "",
             relevantDate: nil,
-            qrPayloadBase64: Data("QR".utf8).base64EncodedString(),
-            backgroundColor: "rgb(15, 118, 110)",
-            sourceFilename: "ticket.pdf"
+            barcodeFormat: .qr,
+            barcodePayloadBase64: Data("QR".utf8).base64EncodedString(),
+            backgroundColor: "rgb(15, 118, 110)"
         )
         let data = try JSONEncoder().encode(draft)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])

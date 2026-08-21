@@ -11,6 +11,8 @@ settings:
     MARKETING_VERSION: 1.0.0
     ENABLE_USER_SCRIPT_SANDBOXING: true
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: true
+    API_BASE_URL: "http://localhost:8787"
+    APP_ATTEST_REQUIRED: "NO"
 targets:
   AnyWallet:
     type: application
@@ -21,12 +23,20 @@ targets:
           - Resources/Preview Content
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.anywallet.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.eneko.anywallet
         PRODUCT_NAME: AnyWallet
         INFOPLIST_FILE: AnyWallet/Resources/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_PREPROCESS: true
+      configs:
+        Debug:
+          INFOPLIST_PREPROCESSOR_DEFINITIONS: "ALLOW_INSECURE_HTTP=1"
+        Release:
+          API_BASE_URL: "https://api.example.invalid"
+          APP_ATTEST_REQUIRED: "YES"
+          CODE_SIGN_ENTITLEMENTS: AnyWallet/AnyWallet.entitlements
     scheme:
       testTargets:
         - AnyWalletTests
