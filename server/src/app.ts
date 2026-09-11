@@ -125,6 +125,12 @@ export async function buildApp(options: BuildAppOptions = {}) {
     return reply.type("text/plain; charset=utf-8").send(`${config.APP_ADS_TXT}\n`);
   });
 
+  app.get("/support", async (_request, reply) => reply
+    .type("text/html; charset=utf-8")
+    .send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soporte de AnyWallet</title><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#172033}h1{line-height:1.2}</style></head>
+<body><h1>Soporte de AnyWallet</h1><p>Si necesitas ayuda con la importación, la creación o la firma de un pase, escribe a <a href="mailto:${config.PASS_CONTACT_EMAIL}">${config.PASS_CONTACT_EMAIL}</a>.</p><p>Incluye el modelo de iPhone, la versión de iOS y una descripción del problema. No envíes billetes, códigos QR ni otros documentos personales por correo.</p><p><a href="/privacy">Política de privacidad</a></p></body></html>`));
+
   app.post("/v1/attest/challenge", {
     config: { rateLimit: { max: 20, timeWindow: "1 minute" } },
   }, async (_request, reply) => {
