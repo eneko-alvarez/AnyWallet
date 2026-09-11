@@ -53,7 +53,7 @@ La URL del API se inyecta mediante el build setting `API_BASE_URL` y termina en 
 
 - Simulador: `http://localhost:8787`
 - iPhone físico: usa la IP LAN del Mac, por ejemplo `http://192.168.1.20:8787`
-- Producción: usa siempre HTTPS. Release no incluye excepciones ATS y exige App Attest.
+- Producción: `https://anywallet.topitup.party`. Release no incluye excepciones ATS y exige App Attest.
 
 En el iPhone físico, `PUBLIC_BASE_URL` en `server/.env` debe usar la misma IP LAN o dominio HTTPS. El valor `localhost` apuntaría al propio iPhone y rompería la descarga del pase.
 
@@ -74,7 +74,7 @@ openssl x509 -inform DER -in AppleWWDRCAG4.cer -out wwdr.pem
 ```
 
 ```dotenv
-PUBLIC_BASE_URL=https://api.tudominio.com
+PUBLIC_BASE_URL=https://anywallet.topitup.party
 PASS_TYPE_IDENTIFIER=pass.com.tudominio.anywallet
 APPLE_TEAM_IDENTIFIER=TU_TEAM_ID
 PASS_ORGANIZATION_NAME=AnyWallet
@@ -128,14 +128,14 @@ PASS_SIGNER_KEY_PASSPHRASE=GESTOR_DE_SECRETOS
 
 El puerto `8787` no debe quedar expuesto directamente a Internet; solo el proxy HTTPS debe alcanzarlo. Mantén una sola réplica hasta mover también los borradores temporales a un almacén compartido.
 
-Para archivar iOS, sustituye el dominio inválido de seguridad incluido en Release:
+El target Release ya usa `https://anywallet.topitup.party`. Puedes sobrescribirlo al archivar si cambia el dominio:
 
 ```bash
 xcodebuild archive \
   -project ios/AnyWallet.xcodeproj \
   -scheme AnyWallet \
   -configuration Release \
-  API_BASE_URL=https://api.tudominio.com
+  API_BASE_URL=https://anywallet.topitup.party
 ```
 
 Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.anywallet`, confirma que el perfil de distribución contiene el entitlement y publica `PRIVACY.md` en una URL HTTPS. Apple exige una URL de política de privacidad y declarar las prácticas de datos en App Store Connect.

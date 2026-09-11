@@ -1,0 +1,30 @@
+services:
+  anywallet-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: anywallet-api:${ANYWALLET_IMAGE_TAG:-latest}
+    container_name: anywallet_api
+    restart: unless-stopped
+    env_file:
+      - server/.env.production
+    volumes:
+      - ./server/data:/app/server/data
+      - ./server/certs:/run/secrets:ro
+    networks:
+      - topitup_net
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 384m
+    cpus: 0.50
+
+networks:
+  topitup_net:
+    external: true
+    name: backend_topitup_net

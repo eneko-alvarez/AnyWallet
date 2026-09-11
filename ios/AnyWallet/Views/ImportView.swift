@@ -76,6 +76,10 @@ struct ImportView: View {
                 Label("El archivo se analiza en este iPhone", systemImage: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(AppTheme.muted)
+
+                Link("Política de privacidad", destination: URL(string: "https://anywallet.topitup.party/privacy")!)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.muted)
             }
         }
         .padding(.horizontal, 24)

@@ -42,7 +42,7 @@ targets:
         Debug:
           INFOPLIST_PREPROCESSOR_DEFINITIONS: "ALLOW_INSECURE_HTTP=1"
         Release:
-          API_BASE_URL: "https://api.example.invalid"
+          API_BASE_URL: "https://anywallet.topitup.party"
           APP_ATTEST_REQUIRED: "YES"
           CODE_SIGN_ENTITLEMENTS: AnyWallet/AnyWallet.entitlements
     scheme:

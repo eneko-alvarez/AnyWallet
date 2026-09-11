@@ -1,5 +1,5 @@
 ANYWALLET — CHECKLIST DE APP STORE, ANUNCIOS Y PRODUCCIÓN
-Actualizado: 25/08/2026
+Actualizado: 11/09/2026
 
 ESTADO QUE YA DEJA EL REPOSITORIO
 
@@ -81,14 +81,16 @@ Desde AdMob, copiar la línea exacta de app-ads.txt. Normalmente tendrá esta fo
 
 google.com, pub-TU_PUBLISHER_ID, DIRECT, f08c47fec0942fa0
 
-Publicarla en la raíz del dominio configurado como Developer Website en App Store Connect:
-https://TU-DOMINIO.TLD/app-ads.txt
+Configurar esa línea como APP_ADS_TXT en server/.env.production. El backend la publica en:
+https://anywallet.topitup.party/app-ads.txt
+
+Usar https://anywallet.topitup.party como Developer Website en App Store Connect.
 
 Debe devolver HTTP 200, text/plain y sin login. Apps de AdMob creadas desde enero de 2025 tienen servicio limitado si no se verifica la propiedad mediante app-ads.txt.
 
 6. PRIVACIDAD Y APP STORE CONNECT
 
-Publicar PRIVACY.md como página HTTPS y usar esa URL en App Privacy Policy.
+Usar https://anywallet.topitup.party/privacy como App Privacy Policy URL.
 
 El contenido del pase nunca se comparte con AdMob. Sin embargo, Google Mobile Ads puede tratar IP/ubicación aproximada, Device ID o identificador limitado a app/desarrollador, interacción con el producto, Advertising Data, Crash Data y Performance Data. Revisar la versión vigente de:
 https://developers.google.com/admob/ios/privacy/data-disclosure
@@ -115,7 +117,7 @@ No marcar la app como Kids Category. Elegir una edad compatible con el contenido
 6) Guardar PEM y passphrase como secretos del servidor, nunca en imagen Docker, repositorio ni backup sin cifrar.
 7) Comprobar que el archive Release contiene el entitlement de App Attest.
 
-8. DESPLIEGUE EN EL MISMO SERVIDOR QUE TOPITUP (NO EJECUTAR TODAVÍA)
+8. DESPLIEGUE EN EL MISMO SERVIDOR QUE TOPITUP
 
 La carga prevista es baja: Fastify, una SQLite pequeña para App Attest y Sharp solo al firmar una foto de <= 280 KB. Un único contenedor con límites de 0.5 CPU y 256-384 MB RAM es un inicio razonable. Medir antes de reducir o escalar.
 
@@ -131,7 +133,7 @@ Variables de producción:
 
 NODE_ENV=production
 PORT=8787
-PUBLIC_BASE_URL=https://api-anywallet.TU-DOMINIO.TLD
+PUBLIC_BASE_URL=https://anywallet.topitup.party
 TRUST_PROXY=true
 APP_BUNDLE_IDENTIFIER=com.eneko.anywallet
 APP_ATTEST_REQUIRED=true
@@ -184,8 +186,8 @@ docker build -t anywallet-api:check .
 cd ios && xcodegen generate
 xcodebuild -project AnyWallet.xcodeproj -scheme AnyWallet -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build
 
-Servidor, después del futuro despliegue:
-curl -fsS https://api-anywallet.TU-DOMINIO.TLD/health
+Servidor, después del despliegue:
+curl -fsS https://anywallet.topitup.party/health
 # Debe responder exactamente: {"ok":true}
 
 Después, probar en iPhone físico:
