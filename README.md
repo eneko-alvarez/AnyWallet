@@ -1,12 +1,12 @@
 # AnyWallet
 
-App iOS nativa para convertir billetes y tarjetas de membresía en pases personales de Apple Wallet.
+App iOS nativa para convertir billetes y tarjetas de membresía en pases personales de Apple Wallet y crear pases personalizados desde cero.
 
-El PDF o la imagen se analiza completamente en el iPhone mediante PDFKit y Vision. El servidor recibe únicamente los campos finales, el tipo de pase y los bytes del código, firma el `.pkpass` y entrega un enlace de descarga de un solo uso.
+El PDF o la imagen se analiza completamente en el iPhone mediante PDFKit y Vision. El servidor recibe únicamente los campos finales, el tipo de pase y los bytes del código, firma el `.pkpass` y entrega un enlace de descarga de un solo uso. Una foto opcional de un pase personalizado se reduce localmente y existe en el servidor solo en memoria durante ese mismo flujo.
 
 ## Estructura
 
-- `ios`: aplicación SwiftUI para iOS 17 o posterior, sin dependencias externas.
+- `ios`: aplicación SwiftUI para iOS 17 o posterior. Google Mobile Ads y UMP se resuelven mediante Swift Package Manager.
 - `server`: API Fastify dedicada exclusivamente a firmar pases.
 
 ## Primer arranque en el Mac
@@ -140,6 +140,8 @@ xcodebuild archive \
 
 Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.anywallet`, confirma que el perfil de distribución contiene el entitlement y publica `PRIVACY.md` en una URL HTTPS. Apple exige una URL de política de privacidad y declarar las prácticas de datos en App Store Connect.
 
+El proyecto usa los identificadores oficiales de anuncios de prueba de AdMob. Sustituye `ADMOB_APP_ID` y `ADMOB_INTERSTITIAL_ID` solo al archivar para producción y completa antes la configuración de consentimiento en AdMob. Consulta `APP_STORE_Y_PRODUCCION.txt`.
+
 ## Límites
 
 - Archivo máximo: 15 MB. Los PDF admiten hasta 12 páginas y las imágenes hasta 40 megapíxeles.
@@ -147,6 +149,6 @@ Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.
 - OCR local en español e inglés para documentos escaneados.
 - El tipo y los campos detectados son sugerencias editables; el usuario puede cambiar entre viaje y membresía.
 - El PDF o la imagen nunca se envía al servidor.
-- El servidor limita el JSON a 64 KB y elimina el borrador tras la primera descarga o a los 10 minutos.
+- El servidor limita el JSON a 512 KB. Las fotos personalizadas se limitan a 280 KB/16 MP, se recodifican en RAM y el borrador se elimina tras la primera descarga o a los 10 minutos.
 - El pase identifica a AnyWallet como firmante y al transportista únicamente como operador original.
 - En producción, crear un pase requiere una clave App Attest válida y una aserción nueva para cada petición.

@@ -1,0 +1,220 @@
+ANYWALLET — CHECKLIST DE APP STORE, ANUNCIOS Y PRODUCCIÓN
+Actualizado: 25/08/2026
+
+ESTADO QUE YA DEJA EL REPOSITORIO
+
+- Importación de PDF/imagen con análisis local en el iPhone.
+- Creación desde cero con título, color, 0-4 campos editables, código opcional y foto opcional.
+- Foto con proporción 1:1, 3:4, 4:3 o 16:9. Se reduce en el iPhone a <= 280 KB.
+- El servidor no guarda documentos ni fotos. El borrador vive en RAM hasta descargarlo una vez o durante 10 minutos.
+- Loading screen sencilla al iniciar y overlay durante análisis/firma.
+- Interstitial de AdMob después de confirmar que un pase nuevo está realmente en Wallet. Si no hay anuncio cargado o no hay consentimiento, se omite: nunca bloquea Wallet.
+- Google UMP solicita el consentimiento aplicable y muestra en inicio un acceso a opciones de privacidad cuando la regulación lo exige.
+- IDs oficiales de prueba de Google activos. No generan ingresos y son seguros para desarrollo.
+
+1. APPLE: ¿HAY QUE OFRECER PREMIUM SIN ANUNCIOS?
+
+No. A fecha de este documento Apple no obliga a ofrecer una versión premium ni una compra para quitar anuncios.
+
+Si más adelante se ofrece “Quitar anuncios”, al ser una función digital debe hacerse con In-App Purchase de Apple (recomendado: compra no consumible) y tener “Restaurar compras”. No se puede cobrar mediante Stripe/web dentro de la app para desbloquearlo.
+
+Los interstitials deben identificarse como anuncios, tener cierre/skip visible, no engañar y permitir reportar anuncios inadecuados. AdMob aporta esos controles en la creatividad. El punto elegido —después de completar la tarea y cerrar Wallet— es una transición natural. Indicar el modelo publicitario en las notas de App Review.
+
+Fuentes oficiales:
+https://developer.apple.com/app-store/review/guidelines/ (2.5.18 y 3.1.1)
+https://developer.apple.com/app-store/user-privacy-and-data-use/
+
+2. RED PUBLICITARIA RECOMENDADA
+
+Empezar con Google AdMob, sin mediación. Es la opción más directa, tiene buen fill internacional, SDK y consentimiento oficiales y poca operación. AppLovin/Unity/ironSource pueden mejorar eCPM en ciertos mercados con mediación, pero añaden SDKs, declaraciones, superficie de privacidad y mantenimiento. No compensa hasta tener volumen medible.
+
+No añadir Firebase Analytics: no hace falta para este producto y mantendrá la app más ligera y privada.
+
+3. CREAR Y OBTENER LAS CLAVES DE ADMOB
+
+1) Entrar en https://admob.google.com con la cuenta definitiva.
+2) Completar identidad, dirección, teléfono, cuenta bancaria y perfil de pagos.
+3) Apps > Add app > iOS > “No, aún no está publicada” si todavía no existe en App Store.
+4) Usar exactamente el Bundle ID de producción: com.eneko.anywallet (o cambiar proyecto, App ID y servidor si se decide otro).
+5) Copiar el “App ID”, formato ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY.
+6) Ad units > Add ad unit > Interstitial. Nombre sugerido: pass_added_interstitial.
+7) Copiar el “Ad unit ID”, formato ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ.
+8) Privacy & messaging: crear y publicar los mensajes de GDPR/EEA, Reino Unido/Suiza y estados de EE. UU. que correspondan. UMP no puede mostrar un mensaje que no se haya publicado en la consola.
+9) Configurar un frequency cap sensato en AdMob si el uso real resulta intenso (punto inicial: máximo 1 impresión cada 2 minutos por usuario).
+10) Tras publicar en App Store, enlazar la ficha a AdMob y completar la revisión de “app readiness”.
+
+Google exige probar siempre con IDs de test. Los que hay en ios/project.yml son los oficiales:
+App test: ca-app-pub-3940256099942544~1458002511
+Interstitial test: ca-app-pub-3940256099942544/4411468910
+
+Fuentes oficiales:
+https://developers.google.com/admob/ios/quick-start
+https://developers.google.com/admob/ios/interstitial
+https://developers.google.com/admob/ios/privacy
+https://support.google.com/admob/answer/9989980
+
+4. PONER LAS CLAVES REALES SIN GUARDARLAS EN GIT
+
+No sustituir los IDs de prueba en el repositorio. Pasarlos al archive de producción desde CI o terminal:
+
+cd ios
+xcodegen generate
+xcodebuild archive \
+  -project AnyWallet.xcodeproj \
+  -scheme AnyWallet \
+  -configuration Release \
+  -archivePath build/AnyWallet.xcarchive \
+  API_BASE_URL=https://api.SUBDOMINIO-REAL.TLD \
+  ADMOB_APP_ID=ca-app-pub-APP_ID_REAL \
+  ADMOB_INTERSTITIAL_ID=ca-app-pub-AD_UNIT_REAL
+
+Verificar el archive antes de subir:
+
+/usr/libexec/PlistBuddy -c 'Print :GADApplicationIdentifier' build/AnyWallet.xcarchive/Products/Applications/AnyWallet.app/Info.plist
+/usr/libexec/PlistBuddy -c 'Print :InterstitialAdUnitID' build/AnyWallet.xcarchive/Products/Applications/AnyWallet.app/Info.plist
+
+Nunca usar el ad unit real en simulador o durante pruebas internas repetitivas. Google puede suspender la cuenta por tráfico inválido.
+
+5. APP-ADS.TXT
+
+Desde AdMob, copiar la línea exacta de app-ads.txt. Normalmente tendrá esta forma:
+
+google.com, pub-TU_PUBLISHER_ID, DIRECT, f08c47fec0942fa0
+
+Publicarla en la raíz del dominio configurado como Developer Website en App Store Connect:
+https://TU-DOMINIO.TLD/app-ads.txt
+
+Debe devolver HTTP 200, text/plain y sin login. Apps de AdMob creadas desde enero de 2025 tienen servicio limitado si no se verifica la propiedad mediante app-ads.txt.
+
+6. PRIVACIDAD Y APP STORE CONNECT
+
+Publicar PRIVACY.md como página HTTPS y usar esa URL en App Privacy Policy.
+
+El contenido del pase nunca se comparte con AdMob. Sin embargo, Google Mobile Ads puede tratar IP/ubicación aproximada, Device ID o identificador limitado a app/desarrollador, interacción con el producto, Advertising Data, Crash Data y Performance Data. Revisar la versión vigente de:
+https://developers.google.com/admob/ios/privacy/data-disclosure
+
+En App Store Connect declarar, como mínimo y según el Privacy Report final del archive:
+- Coarse Location (derivada de IP).
+- Device ID.
+- Product Interaction.
+- Advertising Data.
+- Crash Data y Performance Data.
+- Finalidades de Third-Party Advertising y Analytics/diagnóstico donde correspondan.
+
+Esta integración no pide ATT ni accede voluntariamente al IDFA. Mantener desactivadas configuraciones publicitarias que requieran tracking entre apps/sitios. En “Data Used to Track You”, responder No solo después de confirmar en AdMob y en el App Privacy Report que no se enlaza información con datos de otras empresas para targeting/medición. Si se decide activar publicidad personalizada que constituya tracking, entonces hay que añadir NSUserTrackingUsageDescription, solicitar ATT antes de inicializar anuncios y actualizar PrivacyInfo, política y ficha.
+
+No marcar la app como Kids Category. Elegir una edad compatible con el contenido publicitario configurado. Revisar que AdMob bloquee categorías sensibles/inadecuadas para la edad elegida.
+
+7. CERTIFICADOS Y APPLE DEVELOPER
+
+1) Registrar/confirmar App ID: com.eneko.anywallet.
+2) Activar App Attest para ese App ID y regenerar perfiles de distribución.
+3) Registrar Pass Type ID, por ejemplo pass.com.tudominio.anywallet.
+4) Crear Pass Type ID Certificate, exportar certificado+clave como P12 y convertir a PEM como explica README.md.
+5) Descargar el WWDR vigente de Apple.
+6) Guardar PEM y passphrase como secretos del servidor, nunca en imagen Docker, repositorio ni backup sin cifrar.
+7) Comprobar que el archive Release contiene el entitlement de App Attest.
+
+8. DESPLIEGUE EN EL MISMO SERVIDOR QUE TOPITUP (NO EJECUTAR TODAVÍA)
+
+La carga prevista es baja: Fastify, una SQLite pequeña para App Attest y Sharp solo al firmar una foto de <= 280 KB. Un único contenedor con límites de 0.5 CPU y 256-384 MB RAM es un inicio razonable. Medir antes de reducir o escalar.
+
+Clonar en una carpeta independiente, construir desde la raíz y usar una sola réplica:
+
+git clone URL_DEL_REPOSITORIO /opt/anywallet
+cd /opt/anywallet
+docker build -t anywallet-api:1.0.0 .
+
+Crear /opt/anywallet-data con propietario UID/GID 1000 (usuario node de la imagen) y mantenerla persistente para App Attest. Montar certificados read-only desde /opt/anywallet-secrets o, preferiblemente, desde el gestor de secretos.
+
+Variables de producción:
+
+NODE_ENV=production
+PORT=8787
+PUBLIC_BASE_URL=https://api-anywallet.TU-DOMINIO.TLD
+TRUST_PROXY=true
+APP_BUNDLE_IDENTIFIER=com.eneko.anywallet
+APP_ATTEST_REQUIRED=true
+APP_ATTEST_ALLOW_DEVELOPMENT=false
+APP_ATTEST_DATABASE_PATH=/app/server/data/app-attest.sqlite
+APPLE_TEAM_IDENTIFIER=TEAM_ID_REAL
+PASS_TYPE_IDENTIFIER=pass.com.tudominio.anywallet
+PASS_ORGANIZATION_NAME=AnyWallet
+PASS_CONTACT_EMAIL=correo-real@tudominio.tld
+PASS_SIGNER_CERT_PATH=/run/secrets/signerCert.pem
+PASS_SIGNER_KEY_PATH=/run/secrets/signerKey.pem
+PASS_WWDR_CERT_PATH=/run/secrets/wwdr.pem
+PASS_SIGNER_KEY_PASSPHRASE=DESDE_GESTOR_DE_SECRETOS
+
+Publicar el contenedor solo en 127.0.0.1:8787 (o en una red Docker privada). No exponer 8787 a Internet. El proxy de TopItUp puede convivir sin conflicto usando un server_name/subdominio nuevo y proxy_pass al contenedor.
+
+Ejemplo conceptual Nginx:
+
+server {
+    listen 443 ssl http2;
+    server_name api-anywallet.TU-DOMINIO.TLD;
+    client_max_body_size 512k;
+
+    location / {
+        proxy_pass http://127.0.0.1:8787;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Evitar que tokens de descarga aparezcan en access logs.
+    location ^~ /v1/passes/ {
+        access_log off;
+        proxy_pass http://127.0.0.1:8787;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+Importante: ajustar el proxy a la configuración real existente; no copiar dos bloques que pisen rutas. Usar TLS automático y HSTS solo cuando el subdominio funcione correctamente.
+
+9. VERIFICACIÓN PREVIA Y POSTERIOR AL DESPLIEGUE
+
+Local/CI:
+npm ci
+npm run typecheck
+npm test
+docker build -t anywallet-api:check .
+cd ios && xcodegen generate
+xcodebuild -project AnyWallet.xcodeproj -scheme AnyWallet -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build
+
+Servidor, después del futuro despliegue:
+curl -fsS https://api-anywallet.TU-DOMINIO.TLD/health
+# Debe responder exactamente: {"ok":true}
+
+Después, probar en iPhone físico:
+- PDF real con QR y otro con PDF417/Code128.
+- Imagen desde Fotos.
+- Pase custom sin código.
+- Pase custom con cada formato de código.
+- Foto vertical y horizontal en las cuatro proporciones.
+- Cancelar Wallet: no debe mostrarse anuncio.
+- Añadir Wallet: anuncio test/real solo después de cerrar la hoja.
+- Rechazar consentimiento: el pase debe seguir funcionando aunque no haya anuncio.
+- Modo avión y servidor caído: mensaje comprensible, sin pérdida ni bloqueo de UI.
+
+10. APP REVIEW Y CIERRE
+
+En Review Notes escribir de forma directa:
+“AnyWallet procesa PDFs e imágenes localmente. El servidor solo recibe el borrador revisado y firma un pase de un solo uso. Un interstitial se intenta mostrar únicamente después de añadir correctamente un pase a Apple Wallet; nunca es necesario para completar la función. La app no tiene cuentas ni compra premium.”
+
+Adjuntar instrucciones de prueba y asegurar que el servidor de producción esté activo durante review. No enviar el build con api.example.invalid ni IDs de anuncios de prueba si se pretende monetizar.
+
+Checklist final:
+[ ] Dominio API y TLS reales
+[ ] Certificados Wallet reales
+[ ] App Attest producción probado
+[ ] AdMob App ID y Ad Unit reales inyectados en archive
+[ ] Mensajes UMP publicados
+[ ] app-ads.txt verificado
+[ ] Política de privacidad publicada
+[ ] App Privacy y edad completadas
+[ ] Capturas/metadata App Store
+[ ] Archive probado en iPhone físico/TestFlight
+[ ] Backup cifrado de App Attest SQLite y monitorización 401/429/5xx sin cuerpos

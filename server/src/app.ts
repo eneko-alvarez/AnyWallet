@@ -12,7 +12,7 @@ import {
   type AttestedKey,
 } from "./attestation.js";
 import { config, limits } from "./config.js";
-import { createSignedPass, signingIsConfigured } from "./pass.js";
+import { createSignedPass, signingIsConfigured, validateCustomPhoto } from "./pass.js";
 import type { PassDraft } from "./types.js";
 
 const color = z.string().regex(/^rgb\((?:25[0-5]|2[0-4]\d|1?\d?\d), (?:25[0-5]|2[0-4]\d|1?\d?\d), (?:25[0-5]|2[0-4]\d|1?\d?\d)\)$/);
@@ -25,7 +25,7 @@ const text = (maximum: number) => z.string().trim().max(maximum).refine(
 );
 
 const passDraftSchema = z.object({
-  passKind: z.enum(["travel", "membership"]),
+  passKind: z.enum(["travel", "membership", "custom"]),
   title: text(80).pipe(z.string().min(1)),
   issuer: text(80).default(""),
   origin: text(60).default(""),
@@ -35,9 +35,12 @@ const passDraftSchema = z.object({
   memberName: text(80).default(""),
   memberNumber: text(80).default(""),
   relevantDate: z.iso.datetime().nullable(),
-  barcodeFormat: z.enum(["qr", "code128", "pdf417", "aztec"]),
-  barcodePayloadBase64: base64.max(Math.ceil(limits.maxBarcodeBytes * 4 / 3) + 4),
+  barcodeFormat: z.enum(["qr", "code128", "pdf417", "aztec"]).optional(),
+  barcodePayloadBase64: base64.max(Math.ceil(limits.maxBarcodeBytes * 4 / 3) + 4).optional(),
   backgroundColor: color.default("rgb(15, 118, 110)"),
+  customFields: z.array(z.object({ label: text(30).pipe(z.string().min(1)), value: text(80).pipe(z.string().min(1)) }).strict()).max(4).default([]),
+  photoAspect: z.enum(["square", "portrait", "landscape", "wide"]).optional(),
+  photoBase64: base64.max(Math.ceil(limits.maxPhotoBytes * 4 / 3) + 4).optional(),
 }).strict();
 
 const createPassSchema = z.object({
@@ -65,7 +68,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   const app = Fastify({
     logger: config.NODE_ENV !== "test",
     logController: new LogController({ disableRequestLogging: true }),
-    bodyLimit: 64 * 1024,
+    bodyLimit: 512 * 1024,
     trustProxy: config.TRUST_PROXY ? (_address, hop) => hop === 0 : false,
     requestIdHeader: false,
   });
@@ -163,9 +166,24 @@ export async function buildApp(options: BuildAppOptions = {}) {
     }
 
     const draft = parsed.data.draft;
-    const barcodeBytes = Buffer.from(draft.barcodePayloadBase64, "base64");
-    if (barcodeBytes.byteLength === 0 || barcodeBytes.byteLength > limits.maxBarcodeBytes) {
+    const barcodeBytes = draft.barcodePayloadBase64 ? Buffer.from(draft.barcodePayloadBase64, "base64") : undefined;
+    const hasCompleteBarcode = Boolean(draft.barcodeFormat && barcodeBytes?.byteLength);
+    if ((draft.passKind !== "custom" && !hasCompleteBarcode) ||
+        Boolean(draft.barcodeFormat) !== Boolean(draft.barcodePayloadBase64) ||
+        (barcodeBytes && barcodeBytes.byteLength > limits.maxBarcodeBytes)) {
       return reply.code(400).send({ code: "INVALID_BARCODE", message: "El código seleccionado no es válido." });
+    }
+    if (draft.passKind !== "custom" && (draft.customFields.length || draft.photoBase64 || draft.photoAspect)) {
+      return reply.code(400).send({ code: "INVALID_CUSTOM_DATA", message: "Los datos personalizados no corresponden a este tipo de pase." });
+    }
+    if (Boolean(draft.photoBase64) !== Boolean(draft.photoAspect)) {
+      return reply.code(400).send({ code: "INVALID_PHOTO", message: "La imagen del pase está incompleta." });
+    }
+    if (draft.photoBase64) {
+      const photo = Buffer.from(draft.photoBase64, "base64");
+      if (photo.byteLength === 0 || photo.byteLength > limits.maxPhotoBytes || !(await validateCustomPhoto(photo))) {
+        return reply.code(400).send({ code: "INVALID_PHOTO", message: "La imagen del pase no es válida." });
+      }
     }
     if (!isSigningConfigured()) {
       return reply.code(503).send({ code: "SIGNING_UNAVAILABLE", message: "El servicio de firma no está disponible." });

@@ -52,6 +52,8 @@ export const config = z
 
 export const limits = {
   maxBarcodeBytes: 4096,
+  maxPhotoBytes: 280_000,
+  maxPhotoPixels: 16_000_000,
   passTtlMs: 10 * 60 * 1000,
   challengeTtlMs: 2 * 60 * 1000,
   maxPendingPasses: 1_000,

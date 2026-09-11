@@ -1,7 +1,9 @@
+import PhotosUI
 import SwiftUI
 
 struct TicketEditorView: View {
     @ObservedObject var model: AppViewModel
+    @State private var selectedCustomPhoto: PhotosPickerItem?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,10 +14,13 @@ struct TicketEditorView: View {
                         passKind: model.passKind,
                         fields: model.fields,
                         barcode: model.selectedBarcode,
-                        passColor: model.passColor
+                        passColor: model.passColor,
+                        customFields: model.customFields,
+                        customPhotoData: model.customPhotoData,
+                        photoAspect: model.photoAspect
                     )
 
-                    passKindSection
+                    if !model.isCustomMode { passKindSection }
 
                     if let analysis = model.analysis {
                         ForEach(analysis.warnings, id: \.self) { warning in
@@ -23,6 +28,8 @@ struct TicketEditorView: View {
                         }
                         barcodeSection(analysis.barcodeCandidates)
                     }
+
+                    if model.isCustomMode { customBarcodeSection }
 
                     fieldsSection
                     colorSection
@@ -45,6 +52,20 @@ struct TicketEditorView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
+        .onChange(of: selectedCustomPhoto) { _, item in
+            guard let item else { return }
+            Task {
+                do {
+                    guard let data = try await item.loadTransferable(type: Data.self) else {
+                        throw AnyWalletError.invalidDocument
+                    }
+                    try model.setCustomPhoto(data: data)
+                } catch {
+                    model.errorMessage = error.localizedDescription
+                }
+                selectedCustomPhoto = nil
+            }
+        }
     }
 
     private var header: some View {
@@ -59,19 +80,21 @@ struct TicketEditorView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Nuevo pase").font(.headline).foregroundStyle(AppTheme.ink)
-                Text(model.analysis?.filename ?? "")
+                Text(model.isCustomMode ? "Creado desde cero" : (model.analysis?.filename ?? ""))
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
                     .lineLimit(1)
             }
             Spacer()
-            Label("\(model.analysis?.pageCount ?? 0)", systemImage: "doc")
-                .font(.caption.bold())
-                .foregroundStyle(AppTheme.muted)
-                .padding(.horizontal, 9)
-                .frame(height: 30)
-                .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 8))
-                .overlay { RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line) }
+            if !model.isCustomMode {
+                Label("\(model.analysis?.pageCount ?? 0)", systemImage: "doc")
+                    .font(.caption.bold())
+                    .foregroundStyle(AppTheme.muted)
+                    .padding(.horizontal, 9)
+                    .frame(height: 30)
+                    .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 8))
+                    .overlay { RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line) }
+            }
         }
         .padding(.horizontal, 16)
         .frame(height: 66)
@@ -85,7 +108,7 @@ struct TicketEditorView: View {
                 get: { model.passKind },
                 set: model.selectPassKind
             )) {
-                ForEach(PassKind.allCases) { kind in
+                ForEach([PassKind.travel, .membership]) { kind in
                     Text(kind.title).tag(kind)
                 }
             }
@@ -141,11 +164,97 @@ struct TicketEditorView: View {
                     LabeledField(label: "Operador", placeholder: "Opcional", text: $model.fields.issuer)
                     LabeledField(label: "Referencia", placeholder: "Opcional", text: $model.fields.reference)
                 }
-            } else {
+            } else if model.passKind == .membership {
                 LabeledField(label: "Comercio o programa", placeholder: "Ej. Lidl Plus", text: $model.fields.issuer)
                 LabeledField(label: "Titular", placeholder: "Opcional", text: $model.fields.memberName)
                 LabeledField(label: "Número de socio", placeholder: "Opcional", text: $model.fields.memberNumber)
                 DateField(label: "Fecha de caducidad", pickerLabel: "Caducidad", date: $model.fields.relevantDate)
+            } else {
+                customPhotoSection
+                ForEach($model.customFields) { $field in
+                    HStack(alignment: .bottom, spacing: 8) {
+                        LabeledField(label: "Etiqueta", placeholder: "Ej. Departamento", text: $field.label)
+                        LabeledField(label: "Valor", placeholder: "Ej. Diseño", text: $field.value)
+                        Button(role: .destructive) { model.removeCustomField(id: field.id) } label: {
+                            Image(systemName: "trash")
+                                .frame(width: 42, height: 48)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(AppTheme.danger)
+                        .accessibilityLabel("Eliminar campo")
+                    }
+                }
+                Button(action: model.addCustomField) {
+                    Label("Añadir campo", systemImage: "plus.circle")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .disabled(model.customFields.count >= 4)
+            }
+        }
+    }
+
+    private var customPhotoSection: some View {
+        let photoData = model.customPhotoData
+        let hasPhoto = photoData != nil
+        return VStack(alignment: .leading, spacing: 10) {
+            Text("IMAGEN (OPCIONAL)").font(.caption2.bold()).foregroundStyle(AppTheme.muted)
+            Picker("Proporción", selection: $model.photoAspect) {
+                ForEach(PhotoAspect.allCases) { aspect in Text(aspect.title).tag(aspect) }
+            }
+            .pickerStyle(.segmented)
+
+            HStack(spacing: 12) {
+                if let data = photoData, let image = UIImage(data: data) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 92, height: 92 / model.photoAspect.ratio)
+                        .frame(maxHeight: 122)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    PhotosPicker(selection: $selectedCustomPhoto, matching: .images) {
+                        Label(hasPhoto ? "Cambiar foto" : "Elegir foto", systemImage: "photo")
+                    }
+                    if hasPhoto {
+                        Button("Quitar", role: .destructive) { model.customPhotoData = nil }
+                    }
+                    Text("Se comprime en el iPhone y el servidor solo la mantiene en memoria mientras firma.")
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.muted)
+                }
+            }
+        }
+        .padding(13)
+        .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 8))
+        .overlay { RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line) }
+    }
+
+    private var customBarcodeSection: some View {
+        VStack(alignment: .leading, spacing: 13) {
+            HStack {
+                Text("Código opcional").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+                Spacer()
+                Picker("Formato", selection: $model.customBarcodeFormat) {
+                    ForEach([BarcodeFormat.qr, .code128, .pdf417, .aztec], id: \.rawValue) { format in
+                        Text(format.title).tag(format)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+            LabeledField(
+                label: "Contenido",
+                placeholder: "Texto, número o URL",
+                text: $model.customBarcodeValue
+            )
+            Text("Déjalo vacío si tu pase no necesita código.")
+                .font(.caption)
+                .foregroundStyle(AppTheme.muted)
+            if !model.customBarcodeValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               model.selectedBarcode == nil {
+                Text("El contenido no es compatible con el formato elegido.")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.danger)
             }
         }
     }

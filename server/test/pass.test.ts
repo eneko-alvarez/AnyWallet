@@ -24,6 +24,7 @@ describe("buildPassMetadata", () => {
       barcodeFormat: "qr",
       barcodePayloadBase64: Buffer.from("ABC123").toString("base64"),
       backgroundColor: "rgb(15, 118, 110)",
+      customFields: [],
     }, "serial-1");
 
     expect(metadata.organizationName).toBe("AnyWallet");
@@ -31,7 +32,8 @@ describe("buildPassMetadata", () => {
     if (!("generic" in metadata)) throw new Error("Expected a generic pass");
     expect(metadata.generic.primaryFields[0]?.value).toBe("Billete Bilbao - Donostia");
     expect(metadata.generic.backFields.some((field) => field.value.includes("No está emitido"))).toBe(true);
-    expect(metadata.relevantDates).toEqual([{ relevantDate: "2026-09-14T06:30:00.000Z" }]);
+    expect("relevantDates" in metadata ? metadata.relevantDates : undefined)
+      .toEqual([{ relevantDate: "2026-09-14T06:30:00.000Z" }]);
   });
 
   it("uses the store card layout for memberships", () => {
@@ -49,6 +51,7 @@ describe("buildPassMetadata", () => {
       barcodeFormat: "code128",
       barcodePayloadBase64: Buffer.from("204938102").toString("base64"),
       backgroundColor: "rgb(15, 118, 110)",
+      customFields: [],
     }, "serial-2");
 
     expect(metadata).not.toHaveProperty("generic");
@@ -56,5 +59,30 @@ describe("buildPassMetadata", () => {
     if (!("storeCard" in metadata)) throw new Error("Expected a store card pass");
     expect(metadata.storeCard.primaryFields[0]?.value).toBe("Lidl Plus");
     expect(metadata.storeCard.headerFields[0]?.value).toBe("204938102");
+  });
+
+  it("maps editable custom fields without requiring a barcode", () => {
+    const metadata = buildPassMetadata({
+      passKind: "custom",
+      title: "Acreditación",
+      issuer: "",
+      origin: "",
+      destination: "",
+      passenger: "",
+      reference: "",
+      memberName: "",
+      memberNumber: "",
+      relevantDate: null,
+      backgroundColor: "rgb(29, 78, 216)",
+      customFields: [
+        { label: "Nombre", value: "Ane Lopez" },
+        { label: "Equipo", value: "Diseño" },
+      ],
+    }, "serial-custom");
+
+    expect(metadata).toHaveProperty("generic");
+    if (!("generic" in metadata)) throw new Error("Expected a generic pass");
+    expect(metadata.generic.headerFields[0]?.value).toBe("Ane Lopez");
+    expect(metadata.generic.secondaryFields[0]?.value).toBe("Diseño");
   });
 });

@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import sharp from "sharp";
 import { zipSync } from "fflate";
-import { config } from "./config.js";
+import { config, limits } from "./config.js";
 import type { PassDraft } from "./types.js";
 
 export function signingIsConfigured(): boolean {
@@ -25,6 +25,24 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
     foregroundColor: "rgb(255, 255, 255)",
     labelColor: "rgb(226, 232, 240)",
   };
+
+  if (draft.passKind === "custom") {
+    const visible = draft.customFields.slice(0, 4);
+    return {
+      ...common,
+      generic: {
+        headerFields: visible[0] ? [{ key: "custom0", label: visible[0].label, value: visible[0].value }] : [],
+        primaryFields: [{ key: "title", label: "PASE PERSONAL", value: draft.title }],
+        secondaryFields: visible.slice(1, 3).map((field, index) => ({ key: `custom${index + 1}`, label: field.label, value: field.value })),
+        auxiliaryFields: visible.slice(3).map((field, index) => ({ key: `custom${index + 3}`, label: field.label, value: field.value })),
+        backFields: [
+          ...visible.map((field, index) => ({ key: `detail${index}`, label: field.label, value: field.value })),
+          { key: "notice", label: "Aviso", value: "Pase personal creado por el usuario. AnyWallet únicamente firma y entrega el pase." },
+          { key: "contact", label: "Emisor del pase", value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
+        ],
+      },
+    };
+  }
 
   if (draft.passKind === "membership") {
     return {
@@ -82,7 +100,40 @@ export function walletBarcodeFormat(format: PassDraft["barcodeFormat"]): string 
     case "code128": return "PKBarcodeFormatCode128";
     case "pdf417": return "PKBarcodeFormatPDF417";
     case "aztec": return "PKBarcodeFormatAztec";
+    case undefined: throw new Error("Missing barcode format");
   }
+}
+
+export async function validateCustomPhoto(photo: Buffer): Promise<boolean> {
+  try {
+    const metadata = await sharp(photo, { limitInputPixels: limits.maxPhotoPixels }).metadata();
+    return Boolean(metadata.width && metadata.height && ["jpeg", "png", "heif", "webp"].includes(metadata.format ?? ""));
+  } catch {
+    return false;
+  }
+}
+
+async function photoAssets(draft: PassDraft): Promise<Record<string, Buffer>> {
+  if (!draft.photoBase64 || !draft.photoAspect) return {};
+  const ratios = { square: 1, portrait: 3 / 4, landscape: 4 / 3, wide: 16 / 9 } as const;
+  const ratio = ratios[draft.photoAspect];
+  const dimensions = [1, 2, 3].map((scale) => {
+    const max = 90 * scale;
+    return ratio >= 1
+      ? { width: max, height: Math.round(max / ratio), scale }
+      : { width: Math.round(max * ratio), height: max, scale };
+  });
+  const source = Buffer.from(draft.photoBase64, "base64");
+  const rendered = await Promise.all(dimensions.map(({ width, height }) => sharp(source, { limitInputPixels: limits.maxPhotoPixels })
+    .rotate()
+    .resize(width, height, { fit: "cover" })
+    .png({ compressionLevel: 9 })
+    .toBuffer()));
+  return {
+    "thumbnail.png": rendered[0]!,
+    "thumbnail@2x.png": rendered[1]!,
+    "thumbnail@3x.png": rendered[2]!,
+  };
 }
 
 function signManifest(manifest: Buffer): Promise<Buffer> {
@@ -146,19 +197,21 @@ export async function createSignedPass(draft: PassDraft): Promise<Buffer> {
   ]);
   const metadata = {
     ...buildPassMetadata(draft),
-    barcodes: [
+    ...(draft.barcodeFormat && draft.barcodePayloadBase64 ? { barcodes: [
       {
         format: walletBarcodeFormat(draft.barcodeFormat),
         message: Buffer.from(draft.barcodePayloadBase64, "base64").toString("latin1"),
         messageEncoding: "iso-8859-1",
       },
-    ],
+    ] } : {}),
   };
+  const customPhotos = await photoAssets(draft);
   const files: Record<string, Uint8Array> = {
     "icon.png": icon1x,
     "icon@2x.png": icon2x,
     "icon@3x.png": icon3x,
     "pass.json": Buffer.from(JSON.stringify(metadata)),
+    ...customPhotos,
   };
   const manifestEntries = Object.fromEntries(
     Object.entries(files).map(([filename, contents]) => [filename, createHash("sha1").update(contents).digest("hex")]),

@@ -56,7 +56,10 @@ final class FieldExtractorTests: XCTestCase {
             relevantDate: nil,
             barcodeFormat: .qr,
             barcodePayloadBase64: Data("QR".utf8).base64EncodedString(),
-            backgroundColor: "rgb(15, 118, 110)"
+            backgroundColor: "rgb(15, 118, 110)",
+            customFields: [],
+            photoAspect: nil,
+            photoBase64: nil
         )
         let data = try JSONEncoder().encode(draft)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])

@@ -4,6 +4,7 @@ import UIKit
 enum PassKind: String, Codable, CaseIterable, Identifiable {
     case travel
     case membership
+    case custom
 
     var id: Self { self }
 
@@ -11,8 +12,44 @@ enum PassKind: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .travel: "Viaje"
         case .membership: "Membresía"
+        case .custom: "Personalizado"
         }
     }
+}
+
+enum PhotoAspect: String, Codable, CaseIterable, Identifiable {
+    case square
+    case portrait
+    case landscape
+    case wide
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .square: "1:1"
+        case .portrait: "3:4"
+        case .landscape: "4:3"
+        case .wide: "16:9"
+        }
+    }
+
+    var ratio: CGFloat {
+        switch self {
+        case .square: 1
+        case .portrait: 3 / 4
+        case .landscape: 4 / 3
+        case .wide: 16 / 9
+        }
+    }
+}
+
+struct CustomPassField: Codable, Equatable, Identifiable {
+    var id = UUID()
+    var label: String
+    var value: String
+
+    enum CodingKeys: String, CodingKey { case label, value }
 }
 
 enum BarcodeFormat: String, Codable {
@@ -86,13 +123,17 @@ struct PassDraft: Encodable {
     let memberName: String
     let memberNumber: String
     let relevantDate: Date?
-    let barcodeFormat: BarcodeFormat
-    let barcodePayloadBase64: String
+    let barcodeFormat: BarcodeFormat?
+    let barcodePayloadBase64: String?
     let backgroundColor: String
+    let customFields: [CustomPassField]
+    let photoAspect: PhotoAspect?
+    let photoBase64: String?
 
     enum CodingKeys: String, CodingKey {
         case passKind, title, issuer, origin, destination, passenger, reference
         case memberName, memberNumber, relevantDate, barcodeFormat, barcodePayloadBase64, backgroundColor
+        case customFields, photoAspect, photoBase64
     }
 
     func encode(to encoder: Encoder) throws {
@@ -111,9 +152,12 @@ struct PassDraft: Encodable {
         } else {
             try container.encodeNil(forKey: .relevantDate)
         }
-        try container.encode(barcodeFormat, forKey: .barcodeFormat)
-        try container.encode(barcodePayloadBase64, forKey: .barcodePayloadBase64)
+        try container.encodeIfPresent(barcodeFormat, forKey: .barcodeFormat)
+        try container.encodeIfPresent(barcodePayloadBase64, forKey: .barcodePayloadBase64)
         try container.encode(backgroundColor, forKey: .backgroundColor)
+        try container.encode(customFields, forKey: .customFields)
+        try container.encodeIfPresent(photoAspect, forKey: .photoAspect)
+        try container.encodeIfPresent(photoBase64, forKey: .photoBase64)
     }
 }
 

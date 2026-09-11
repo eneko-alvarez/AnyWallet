@@ -1,5 +1,5 @@
 export type PassDraft = {
-  passKind: "travel" | "membership";
+  passKind: "travel" | "membership" | "custom";
   title: string;
   issuer: string;
   origin: string;
@@ -9,7 +9,10 @@ export type PassDraft = {
   memberName: string;
   memberNumber: string;
   relevantDate: string | null;
-  barcodeFormat: "qr" | "code128" | "pdf417" | "aztec";
-  barcodePayloadBase64: string;
+  barcodeFormat?: "qr" | "code128" | "pdf417" | "aztec";
+  barcodePayloadBase64?: string;
   backgroundColor: string;
+  customFields: Array<{ label: string; value: string }>;
+  photoAspect?: "square" | "portrait" | "landscape" | "wide";
+  photoBase64?: string;
 };

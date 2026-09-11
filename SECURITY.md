@@ -9,15 +9,17 @@ Para firmar el pase se envían únicamente:
 - título y campos que el usuario ha revisado;
 - bytes del QR o código de barras codificados en Base64;
 - color del pase.
+- en pases creados desde cero, los campos elegidos y, si el usuario la añade, una foto ya reducida a un máximo de 280 KB.
 
-El borrador vive en memoria durante un máximo de 10 minutos y desaparece en la primera descarga. No se registra el contenido del QR.
+El borrador y cualquier foto viven solo en memoria durante un máximo de 10 minutos y desaparecen en la primera descarga. No se registra el contenido del QR ni de la imagen.
 
 ## Controles
 
 - PDF limitado a 15 MB y 12 páginas en el dispositivo;
 - código limitado a 4 KB tanto en el cliente como en el servidor;
 - contenido del código tratado como datos opacos, sin abrir URLs ni hacer solicitudes;
-- cuerpo JSON limitado a 64 KB y validado con esquema estricto;
+- cuerpo JSON limitado a 512 KB y validado con esquema estricto;
+- foto opcional limitada a 280 KB y 16 MP, validada y recodificada por Sharp sin escritura a disco;
 - clave privada y certificado disponibles únicamente en el servidor;
 - token de descarga aleatorio, no cacheable y de un solo uso;
 - token de descarga guardado en memoria únicamente como hash SHA-256;

@@ -4,12 +4,12 @@ import SwiftUI
 struct WalletPassSheet: UIViewControllerRepresentable {
     @Environment(\.dismiss) private var dismiss
     let data: Data
-    let onFinish: () -> Void
+    let onFinish: (Bool) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator {
+        Coordinator(data: data) { wasAdded in
             dismiss()
-            onFinish()
+            onFinish(wasAdded)
         }
     }
 
@@ -27,14 +27,17 @@ struct WalletPassSheet: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 
     final class Coordinator: NSObject, PKAddPassesViewControllerDelegate {
-        private let onFinish: () -> Void
+        private let pass: PKPass?
+        private let completion: (Bool) -> Void
 
-        init(onFinish: @escaping () -> Void) {
-            self.onFinish = onFinish
+        init(data: Data, completion: @escaping (Bool) -> Void) {
+            pass = try? PKPass(data: data)
+            self.completion = completion
         }
 
         func addPassesViewControllerDidFinish(_ controller: PKAddPassesViewController) {
-            onFinish()
+            let wasAdded = pass.map { PKPassLibrary().containsPass($0) } ?? false
+            completion(wasAdded)
         }
     }
 }

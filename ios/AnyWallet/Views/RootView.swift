@@ -4,17 +4,22 @@ import UniformTypeIdentifiers
 
 struct RootView: View {
     @StateObject private var model = AppViewModel()
+    @StateObject private var ads = AdService()
     @State private var isImporterPresented = false
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var isLaunching = true
 
     var body: some View {
         ZStack {
             AppTheme.canvas.ignoresSafeArea()
-            if model.analysis == nil {
+            if model.analysis == nil && !model.isCustomMode {
                 ImportView(
                     isAnalyzing: model.isAnalyzing,
                     selectedPhoto: $selectedPhoto,
-                    onImportFile: { isImporterPresented = true }
+                    onImportFile: { isImporterPresented = true },
+                    onCreateCustom: model.startCustomPass,
+                    showsAdPrivacyOptions: ads.privacyOptionsRequired,
+                    onAdPrivacyOptions: ads.showPrivacyOptions
                 )
             } else {
                 TicketEditorView(model: model)
@@ -22,6 +27,12 @@ struct RootView: View {
 
             if model.isAnalyzing {
                 LoadingOverlay(label: "Analizando el pase")
+            }
+
+            if isLaunching {
+                LaunchView()
+                    .transition(.opacity)
+                    .zIndex(10)
             }
         }
         .fileImporter(
@@ -62,10 +73,36 @@ struct RootView: View {
             Text(model.errorMessage ?? "Error desconocido")
         }
         .sheet(item: $model.pendingWalletPass) { pending in
-            WalletPassSheet(data: pending.data) {
+            WalletPassSheet(data: pending.data) { wasAdded in
                 model.reset()
+                if wasAdded { ads.showAfterSuccessfulPass() }
             }
         }
+        .task {
+            ads.prepare()
+            try? await Task.sleep(for: .milliseconds(650))
+            withAnimation(.easeOut(duration: 0.22)) { isLaunching = false }
+        }
+    }
+}
+
+private struct LaunchView: View {
+    var body: some View {
+        ZStack {
+            Color.white.ignoresSafeArea()
+            VStack(spacing: 18) {
+                Image("BrandMark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 68, height: 68)
+                Text("AnyWallet")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundStyle(AppTheme.ink)
+                ProgressView().tint(AppTheme.accent)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Abriendo AnyWallet")
     }
 }
 

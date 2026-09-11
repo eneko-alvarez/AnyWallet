@@ -5,6 +5,9 @@ struct PassPreviewView: View {
     let fields: TicketFields
     let barcode: BarcodeCandidate?
     let passColor: PassColor
+    let customFields: [CustomPassField]
+    let customPhotoData: Data?
+    let photoAspect: PhotoAspect
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,12 +15,12 @@ struct PassPreviewView: View {
                 HStack {
                     Text("AnyWallet").font(.headline.bold())
                     Spacer()
-                    Text(passKind == .travel ? fields.reference : fields.memberNumber)
+                    Text(headerValue)
                         .font(.caption.bold())
                         .lineLimit(1)
                 }
 
-                Text(passKind == .travel ? "BILLETE PERSONAL" : "TARJETA DE MEMBRESÍA")
+                Text(kindLabel)
                     .font(.caption2.bold())
                     .foregroundStyle(.white.opacity(0.72))
                     .padding(.top, 18)
@@ -35,9 +38,25 @@ struct PassPreviewView: View {
                         place(label: "DESTINO", value: fields.destination, isTrailing: true)
                     }
                     .padding(.bottom, 19)
-                } else {
+                } else if passKind == .membership {
                     place(label: "PROGRAMA", value: fields.issuer, isTrailing: false)
                         .padding(.bottom, 19)
+                } else {
+                    HStack(alignment: .top, spacing: 14) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(customFields.prefix(2)) { field in
+                                place(label: field.label.uppercased(), value: field.value, isTrailing: false)
+                            }
+                        }
+                        if let customPhotoData, let image = UIImage(data: customPhotoData) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 82, height: min(104, 82 / photoAspect.ratio))
+                                .clipShape(RoundedRectangle(cornerRadius: 7))
+                        }
+                    }
+                    .padding(.bottom, 19)
                 }
             }
             .padding(.horizontal, 18)
@@ -46,7 +65,7 @@ struct PassPreviewView: View {
 
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(passKind == .travel ? "FECHA Y HORA" : "TITULAR").font(.caption2.bold()).foregroundStyle(AppTheme.muted)
+                    Text(detailLabel).font(.caption2.bold()).foregroundStyle(AppTheme.muted)
                     Text(primaryDetail)
                         .font(.subheadline.bold()).foregroundStyle(AppTheme.ink)
                     if !secondaryDetail.isEmpty {
@@ -74,6 +93,9 @@ struct PassPreviewView: View {
     }
 
     private var primaryDetail: String {
+        if passKind == .custom {
+            return customFields.dropFirst(2).first?.value.nonEmpty ?? "Pase personal"
+        }
         if passKind == .membership {
             return fields.memberName.isEmpty ? "Sin titular" : fields.memberName
         }
@@ -81,10 +103,35 @@ struct PassPreviewView: View {
     }
 
     private var secondaryDetail: String {
+        if passKind == .custom { return customFields.dropFirst(3).first?.value ?? "" }
         if passKind == .membership {
             return fields.memberNumber.isEmpty ? "" : "N.º \(fields.memberNumber)"
         }
         return fields.passenger
+    }
+
+    private var headerValue: String {
+        switch passKind {
+        case .travel: fields.reference
+        case .membership: fields.memberNumber
+        case .custom: customFields.first?.value ?? ""
+        }
+    }
+
+    private var kindLabel: String {
+        switch passKind {
+        case .travel: "BILLETE PERSONAL"
+        case .membership: "TARJETA DE MEMBRESÍA"
+        case .custom: "PASE PERSONALIZADO"
+        }
+    }
+
+    private var detailLabel: String {
+        switch passKind {
+        case .travel: "FECHA Y HORA"
+        case .membership: "TITULAR"
+        case .custom: customFields.dropFirst(2).first?.label.uppercased() ?? "DETALLE"
+        }
     }
 
     private func place(label: String, value: String, isTrailing: Bool) -> some View {
@@ -94,4 +141,8 @@ struct PassPreviewView: View {
         }
         .frame(maxWidth: .infinity, alignment: isTrailing ? .trailing : .leading)
     }
+}
+
+private extension String {
+    var nonEmpty: String? { isEmpty ? nil : self }
 }

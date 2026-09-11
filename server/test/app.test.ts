@@ -17,6 +17,7 @@ const validDraft = {
   barcodeFormat: "qr",
   barcodePayloadBase64: Buffer.from("ABC123").toString("base64"),
   backgroundColor: "rgb(15, 118, 110)",
+  customFields: [],
 };
 
 describe("API", () => {
@@ -79,6 +80,45 @@ describe("API", () => {
       payload: { challenge: testChallenge, draft: { ...validDraft, admin: true } },
     });
     expect(response.statusCode).toBe(400);
+  });
+
+  it("accepts a custom pass without a barcode", async () => {
+    app = await buildApp({ signingIsConfigured: () => true });
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/passes",
+      payload: {
+        challenge: testChallenge,
+        draft: {
+          ...validDraft,
+          passKind: "custom",
+          barcodeFormat: undefined,
+          barcodePayloadBase64: undefined,
+          customFields: [{ label: "Nombre", value: "Ane" }],
+        },
+      },
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("rejects malformed custom photos before creating a download", async () => {
+    app = await buildApp({ signingIsConfigured: () => true });
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/passes",
+      payload: {
+        challenge: testChallenge,
+        draft: {
+          ...validDraft,
+          passKind: "custom",
+          customFields: [],
+          photoAspect: "square",
+          photoBase64: Buffer.from("not-an-image").toString("base64"),
+        },
+      },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json().code).toBe("INVALID_PHOTO");
   });
 
   it("requires an attested key and a fresh assertion for pass creation", async () => {

@@ -5,6 +5,9 @@ struct ImportView: View {
     let isAnalyzing: Bool
     @Binding var selectedPhoto: PhotosPickerItem?
     let onImportFile: () -> Void
+    let onCreateCustom: () -> Void
+    let showsAdPrivacyOptions: Bool
+    let onAdPrivacyOptions: () -> Void
 
     @State private var isSourceDialogPresented = false
     @State private var isPhotoPickerPresented = false
@@ -59,6 +62,17 @@ struct ImportView: View {
                 .buttonStyle(.plain)
                 .disabled(isAnalyzing)
 
+                Button(action: onCreateCustom) {
+                    Label("Crear desde cero", systemImage: "slider.horizontal.3")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(AppTheme.ink)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay { RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line) }
+                }
+                .buttonStyle(.plain)
+                .disabled(isAnalyzing)
+
                 Label("El archivo se analiza en este iPhone", systemImage: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(AppTheme.muted)
@@ -73,8 +87,8 @@ struct ImportView: View {
             isPresented: $isSourceDialogPresented,
             titleVisibility: .visible
         ) {
-            Button("Fotos") { isPhotoPickerPresented = true }
-            Button("Archivos") { onImportFile() }
+            Button("Foto de un billete o tarjeta") { isPhotoPickerPresented = true }
+            Button("PDF o imagen desde Archivos") { onImportFile() }
             Button("Cancelar", role: .cancel) {}
         }
         .photosPicker(
@@ -96,6 +110,14 @@ struct ImportView: View {
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(AppTheme.ink)
             Spacer()
+            if showsAdPrivacyOptions {
+                Button(action: onAdPrivacyOptions) {
+                    Image(systemName: "hand.raised")
+                        .foregroundStyle(AppTheme.muted)
+                        .frame(width: 40, height: 40)
+                }
+                .accessibilityLabel("Opciones de privacidad de anuncios")
+            }
         }
     }
 }
