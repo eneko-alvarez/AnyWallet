@@ -1,5 +1,9 @@
 ANYWALLET — CHECKLIST DE APP STORE, ANUNCIOS Y PRODUCCIÓN
-Actualizado: 11/09/2026
+Actualizado: 13/09/2026
+
+ESTADO DE LA VERSION 1.0: SIN ANUNCIOS. Todo lo relativo a AdMob en este
+documento queda aplazado a una actualizacion posterior a la publicacion.
+No pongas IDs reales ni de prueba en el archive de la primera version.
 
 ESTADO QUE YA DEJA EL REPOSITORIO
 
@@ -8,9 +12,8 @@ ESTADO QUE YA DEJA EL REPOSITORIO
 - Foto con proporción 1:1, 3:4, 4:3 o 16:9. Se reduce en el iPhone a <= 280 KB.
 - El servidor no guarda documentos ni fotos. El borrador vive en RAM hasta descargarlo una vez o durante 10 minutos.
 - Loading screen sencilla al iniciar y overlay durante análisis/firma.
-- Interstitial de AdMob después de confirmar que un pase nuevo está realmente en Wallet. Si no hay anuncio cargado o no hay consentimiento, se omite: nunca bloquea Wallet.
-- Google UMP solicita el consentimiento aplicable y muestra en inicio un acceso a opciones de privacidad cuando la regulación lo exige.
-- IDs oficiales de prueba de Google activos. No generan ingresos y son seguros para desarrollo.
+- El codigo de AdMob/UMP queda conservado pero excluido del build; no se enlaza
+  el SDK, no se hacen solicitudes de anuncios y la ficha 1.0 no declara publicidad.
 
 1. APPLE: ¿HAY QUE OFRECER PREMIUM SIN ANUNCIOS?
 

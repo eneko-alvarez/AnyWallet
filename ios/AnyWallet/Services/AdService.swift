@@ -1,3 +1,6 @@
+// Publicidad desactivada en la primera version. Definir ANYWALLET_ADS solo
+// cuando se restauren el paquete, los IDs y las declaraciones de privacidad.
+#if ANYWALLET_ADS
 import Foundation
 import GoogleMobileAds
 import UserMessagingPlatform
@@ -82,3 +85,4 @@ final class AdService: NSObject, ObservableObject, FullScreenContentDelegate {
         Task { await loadInterstitial() }
     }
 }
+#endif

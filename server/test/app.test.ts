@@ -37,6 +37,16 @@ describe("API", () => {
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
+  it("publishes a no-ads privacy policy for the first release", async () => {
+    app = await buildApp();
+    const response = await app.inject({ method: "GET", url: "/privacy" });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/html");
+    expect(response.body).toContain("no muestra anuncios");
+    expect(response.body).not.toMatch(/AdMob|Google Mobile Ads|User Messaging Platform/);
+    expect((await app.inject({ method: "GET", url: "/app-ads.txt" })).statusCode).toBe(404);
+  });
+
   it("does not expose a PDF upload endpoint", async () => {
     app = await buildApp();
     const response = await app.inject({ method: "POST", url: "/v1/analyze" });

@@ -25,7 +25,7 @@ export const config = z
     APP_ATTEST_ALLOW_DEVELOPMENT: envBoolean(!production),
     APP_ATTEST_DATABASE_PATH: z.string().trim().min(1).default("./data/app-attest.sqlite"),
     TRUST_PROXY: envBoolean(production),
-    APP_ADS_TXT: z.string().trim().min(1).optional(),
+    // Publicidad futura: APP_ADS_TXT: z.string().trim().min(1).optional(),
   })
   .superRefine((value, context) => {
     if (value.NODE_ENV === "production" && !value.PUBLIC_BASE_URL.startsWith("https://")) {

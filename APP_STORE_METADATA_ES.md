@@ -13,7 +13,7 @@
 - Sitio web del desarrollador: `https://anywallet.topitup.party`
 - URL de soporte: `https://anywallet.topitup.party/support`
 - URL de política de privacidad: `https://anywallet.topitup.party/privacy`
-- URL de opciones de privacidad: `https://anywallet.topitup.party/privacy`
+- URL de opciones de privacidad: dejar vacía en esta versión sin anuncios
 
 ## Texto promocional
 
@@ -48,7 +48,7 @@ AnyWallet procesa los PDF y las imágenes localmente. El servidor solo recibe el
 
 Para probarla, pulsa “Crear pase”, importa un PDF o una imagen que contenga un QR o código de barras, revisa los campos y pulsa “Añadir a Apple Wallet”. También se puede usar “Crear desde cero” sin importar ningún archivo.
 
-Se intenta mostrar un interstitial únicamente después de que el usuario haya añadido correctamente un pase y haya cerrado la hoja de Apple Wallet. El anuncio nunca es necesario para completar la función. Si no existe consentimiento o el anuncio no está cargado, se omite.
+La versión 1.0 no contiene publicidad ni SDK publicitarios.
 
 Los documentos pertenecen al usuario y se usan únicamente para crear copias personales. Los pases indican que AnyWallet es el firmante y que no están emitidos ni respaldados por el operador original.
 
@@ -57,7 +57,7 @@ No se necesitan credenciales ni una cuenta de demostración.
 ## Pendientes manuales de la ficha
 
 - Completar el cuestionario de derechos de contenido indicando que la app accede a documentos aportados por el usuario para uso personal y no redistribuye contenido de terceros.
-- Completar el cuestionario de edad según los anuncios permitidos en AdMob; no seleccionar la categoría infantil.
+- Completar el cuestionario de edad según el contenido real de la app, que no tiene publicidad en esta versión.
 - Completar el estado DSA y los datos de contacto requeridos para distribuir en la UE.
 - Subir al menos una captura sin transparencia para iPhone de 6,9 pulgadas; se recomiendan tres: inicio, edición y vista previa.
 - Seleccionar el build, contestar export compliance y elegir publicación manual tras la aprobación.

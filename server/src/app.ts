@@ -113,17 +113,14 @@ export async function buildApp(options: BuildAppOptions = {}) {
     .send(`<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Política de privacidad de AnyWallet</title><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#172033}h1,h2{line-height:1.2}</style></head>
-<body><h1>Política de privacidad de AnyWallet</h1><p>Última actualización: 11 de septiembre de 2026.</p>
+<body><h1>Política de privacidad de AnyWallet</h1><p>Última actualización: 13 de septiembre de 2026.</p>
 <h2>Datos tratados</h2><p>Los PDF e imágenes elegidos se analizan localmente en el iPhone y no se suben. Para crear el pase, AnyWallet envía temporalmente al servicio de firma los campos revisados, el color, el tipo de pase y los bytes del código. Las fotos opcionales se comprimen en el dispositivo y se usan solo para incorporarlas al pase.</p>
-<p>El borrador existe en memoria durante un máximo de diez minutos y se elimina al descargar el pase. Su contenido no se usa para publicidad, analítica, perfiles ni seguimiento, y no se comparte con el proveedor de anuncios. Las claves públicas de App Attest se mantienen mientras sean necesarias para prevenir abuso; puedes solicitar su eliminación mediante el correo de contacto.</p>
+<p>El borrador existe en memoria durante un máximo de diez minutos y se elimina al descargar el pase. Su contenido no se usa para publicidad, analítica, perfiles ni seguimiento, y no se comparte con terceros. Las claves públicas de App Attest se mantienen mientras sean necesarias para prevenir abuso; puedes solicitar su eliminación mediante el correo de contacto.</p>
 <h2>Seguridad</h2><p>AnyWallet usa App Attest para comprobar que las solicitudes proceden de una instalación legítima. El servidor conserva la clave pública y el contador criptográfico de la instalación para prevenir abuso y repeticiones. La comunicación usa HTTPS y los pases se firman con un certificado de Apple guardado únicamente en el servidor.</p>
-<h2>Publicidad</h2><p>AnyWallet puede mostrar un anuncio de Google AdMob después de añadir correctamente un pase a Apple Wallet. Google User Messaging Platform gestiona las elecciones de privacidad aplicables y permite cambiar o retirar el consentimiento. Google puede tratar la dirección IP, identificadores del dispositivo o de la app, interacción con anuncios, datos publicitarios y diagnósticos. AnyWallet no entrega a Google documentos, fotos, códigos ni campos de los pases. Exigimos a los proveedores que tratan datos para AnyWallet una protección coherente con esta política y con los requisitos aplicables de Apple.</p>
-<h2>Contacto</h2><p>Para consultas de privacidad, retirada de consentimiento o solicitudes de acceso y eliminación: <a href="mailto:${config.PASS_CONTACT_EMAIL}">${config.PASS_CONTACT_EMAIL}</a>.</p></body></html>`));
+<h2>Publicidad</h2><p>Esta version de AnyWallet no muestra anuncios ni integra redes publicitarias.</p>
+<h2>Contacto</h2><p>Para consultas de privacidad o solicitudes de acceso y eliminación: <a href="mailto:${config.PASS_CONTACT_EMAIL}">${config.PASS_CONTACT_EMAIL}</a>.</p></body></html>`));
 
-  app.get("/app-ads.txt", async (_request, reply) => {
-    if (!config.APP_ADS_TXT) return reply.code(404).type("text/plain").send("Not configured\n");
-    return reply.type("text/plain; charset=utf-8").send(`${config.APP_ADS_TXT}\n`);
-  });
+  // Publicidad futura: reactivar /app-ads.txt con APP_ADS_TXT al crear AdMob.
 
   app.get("/support", async (_request, reply) => reply
     .type("text/html; charset=utf-8")

@@ -6,7 +6,7 @@ El PDF o la imagen se analiza completamente en el iPhone mediante PDFKit y Visio
 
 ## Estructura
 
-- `ios`: aplicación SwiftUI para iOS 17 o posterior. Google Mobile Ads y UMP se resuelven mediante Swift Package Manager.
+- `ios`: aplicación SwiftUI para iOS 17 o posterior. La primera versión no incluye SDK publicitarios.
 - `server`: API Fastify dedicada exclusivamente a firmar pases.
 
 ## Primer arranque en el Mac
@@ -140,7 +140,7 @@ xcodebuild archive \
 
 Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.anywallet`, confirma que el perfil de distribución contiene el entitlement y publica `PRIVACY.md` en una URL HTTPS. Apple exige una URL de política de privacidad y declarar las prácticas de datos en App Store Connect.
 
-El proyecto usa los identificadores oficiales de anuncios de prueba de AdMob. Sustituye `ADMOB_APP_ID` y `ADMOB_INTERSTITIAL_ID` solo al archivar para producción y completa antes la configuración de consentimiento en AdMob. Consulta `APP_STORE_Y_PRODUCCION.txt`.
+La primera versión se archiva sin publicidad mediante `ios/archive-app-store.sh`; las instrucciones completas para el Mac están en `MAC_APP_STORE.md`. La integración futura de AdMob queda desactivada y señalada en el código; consulta `APP_STORE_Y_PRODUCCION.txt` solo cuando prepares esa actualización.
 
 ## Límites
 

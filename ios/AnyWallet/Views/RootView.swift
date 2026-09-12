@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 
 struct RootView: View {
     @StateObject private var model = AppViewModel()
-    @StateObject private var ads = AdService()
+    // Publicidad futura: @StateObject private var ads = AdService()
     @State private var isImporterPresented = false
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var isLaunching = true
@@ -17,9 +17,8 @@ struct RootView: View {
                     isAnalyzing: model.isAnalyzing,
                     selectedPhoto: $selectedPhoto,
                     onImportFile: { isImporterPresented = true },
-                    onCreateCustom: model.startCustomPass,
-                    showsAdPrivacyOptions: ads.privacyOptionsRequired,
-                    onAdPrivacyOptions: ads.showPrivacyOptions
+                    onCreateCustom: model.startCustomPass
+                    // Publicidad futura: añadir los argumentos de privacidad de AdService.
                 )
             } else {
                 TicketEditorView(model: model)
@@ -73,13 +72,13 @@ struct RootView: View {
             Text(model.errorMessage ?? "Error desconocido")
         }
         .sheet(item: $model.pendingWalletPass) { pending in
-            WalletPassSheet(data: pending.data) { wasAdded in
+            WalletPassSheet(data: pending.data) { _ in
                 model.reset()
-                if wasAdded { ads.showAfterSuccessfulPass() }
+                // Publicidad futura: if wasAdded { ads.showAfterSuccessfulPass() }
             }
         }
         .task {
-            ads.prepare()
+            // Publicidad futura: ads.prepare()
             try? await Task.sleep(for: .milliseconds(650))
             withAnimation(.easeOut(duration: 0.22)) { isLaunching = false }
         }

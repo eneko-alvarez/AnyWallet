@@ -42,6 +42,7 @@
     <string>$(API_BASE_URL)</string>
     <key>AppAttestRequired</key>
     <string>$(APP_ATTEST_REQUIRED)</string>
+    <!-- Publicidad futura: descomentar junto con el SDK y UMP.
     <key>GADApplicationIdentifier</key>
     <string>$(ADMOB_APP_ID)</string>
     <key>InterstitialAdUnitID</key>
@@ -102,6 +103,7 @@
         <dict><key>SKAdNetworkIdentifier</key><string>97r2b46745.skadnetwork</string></dict>
         <dict><key>SKAdNetworkIdentifier</key><string>3qcr597p9d.skadnetwork</string></dict>
     </array>
+    -->
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
 #if ALLOW_INSECURE_HTTP
