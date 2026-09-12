@@ -39,11 +39,15 @@ targets:
         INFOPLIST_FILE: AnyWallet/Resources/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: B6757Q5N7U
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_PREPROCESS: true
       configs:
         Debug:
           INFOPLIST_PREPROCESSOR_DEFINITIONS: "ALLOW_INSECURE_HTTP=1"
+          "API_BASE_URL[sdk=iphoneos*]": "https://anywallet.topitup.party"
+          "APP_ATTEST_REQUIRED[sdk=iphoneos*]": "YES"
+          "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": AnyWallet/AnyWallet.entitlements
         Release:
           API_BASE_URL: "https://anywallet.topitup.party"
           APP_ATTEST_REQUIRED: "YES"

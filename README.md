@@ -51,11 +51,11 @@ npm run dev:server
 
 La URL del API se inyecta mediante el build setting `API_BASE_URL` y termina en la clave `APIBaseURL` del bundle.
 
-- Simulador: `http://localhost:8787`
-- iPhone físico: usa la IP LAN del Mac, por ejemplo `http://192.168.1.20:8787`
+- Simulador en Debug: `http://localhost:8787` (requiere el servidor local en ejecución).
+- iPhone físico en Debug: `https://anywallet.topitup.party`, con App Attest activado, también al ejecutar desde Xcode.
 - Producción: `https://anywallet.topitup.party`. Release no incluye excepciones ATS y exige App Attest.
 
-En el iPhone físico, `PUBLIC_BASE_URL` en `server/.env` debe usar la misma IP LAN o dominio HTTPS. El valor `localhost` apuntaría al propio iPhone y rompería la descarga del pase.
+Tras cambiar `ios/project.yml`, ejecuta `make xcode-project` para actualizar el proyecto de Xcode. Para probar un servidor local desde el iPhone, sobrescribe explícitamente `API_BASE_URL` con la IP LAN del Mac y `APP_ATTEST_REQUIRED=NO`; `PUBLIC_BASE_URL` en `server/.env` debe usar la misma IP LAN. El valor `localhost` apuntaría al propio iPhone y rompería la descarga del pase.
 
 ## Pass Type ID y firma
 
