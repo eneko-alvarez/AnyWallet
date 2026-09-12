@@ -11,37 +11,39 @@
 - Categoría principal: Utilidades
 - Categoría secundaria: Viajes
 - Precio: Gratis
+- Copyright: `2026 [nombre legal del titular]` (Apple añade el símbolo © automáticamente)
 - Sitio web del desarrollador: `https://anywallet.topitup.party`
+- URL de marketing: `https://anywallet.topitup.party`
 - URL de soporte: `https://anywallet.topitup.party/support`
 - URL de política de privacidad: `https://anywallet.topitup.party/privacy`
-- URL de opciones de privacidad: dejar vacía en esta versión sin anuncios
+- URL de opciones de privacidad: dejar vacía (opcional)
+- Correo de soporte público: `anywallet@topitup.party`
 
 ## Texto promocional
 
-Convierte tus billetes, tarjetas y códigos en pases personales para Apple Wallet directamente desde tu iPhone.
+Billetes, tarjetas y códigos, listos para Apple Wallet. Importa un PDF o una imagen, revisa los datos y crea un pase personal en unos pocos toques.
 
 ## Descripción
 
-AnyWallet convierte billetes, tarjetas de membresía y códigos en pases personales para Apple Wallet.
+AnyWallet convierte tus billetes, tarjetas y códigos en pases personales para Apple Wallet.
 
-Importa un PDF o una imagen y revisa los datos detectados antes de crear el pase. También puedes crear un pase desde cero, elegir su color, añadir campos propios e incorporar un código QR, PDF417, Aztec o Code 128.
+Importa un PDF o una imagen, revisa los datos detectados y añade el pase a Wallet. También puedes crear uno desde cero, elegir su color, añadir campos propios e incorporar un código QR o de barras.
 
-El análisis se realiza en tu iPhone. El documento original no se sube al servidor. El servicio recibe únicamente los datos que has revisado y los utiliza de forma temporal para firmar el pase.
+Lo que puedes hacer:
+• Crear pases de viaje, membresía y personalizados.
+• Leer texto y códigos de PDF e imágenes en el iPhone.
+• Editar los datos antes de crear cada pase.
+• Añadir el resultado directamente a Apple Wallet.
 
-Funciones principales:
+No necesitas crear una cuenta. Esta primera versión no incluye anuncios ni suscripciones.
 
-- Importación de PDF e imágenes.
-- Lectura local de texto y códigos.
-- Edición de todos los campos antes de crear el pase.
-- Pases de viaje, membresía y personalizados.
-- Integración directa con Apple Wallet.
-- Sin cuentas ni suscripciones.
+El documento original se analiza en tu iPhone y no se sube. Para firmar el pase solo se envían temporalmente los campos revisados, el código y, si la añades, una foto comprimida.
 
-AnyWallet crea copias personales y no sustituye al documento original. Conserva siempre el billete o la tarjeta emitidos por el proveedor.
+Los pases son copias personales: no sustituyen al billete o la tarjeta emitidos por el proveedor. Conserva siempre el original.
 
 ## Palabras clave
 
-`pases,billetes,tarjetas,QR,Wallet,PDF,viajes,membresía,códigos`
+`billetes,tarjetas,entradas,códigos,pdf,viajes,membresía,escáner`
 
 ## Notas para App Review
 
