@@ -25,6 +25,7 @@ RUN npm ci --omit=dev \
     && chown -R node:node /app
 
 COPY --from=build --chown=node:node /app/server/dist server/dist
+COPY --chown=node:node server/public server/public
 
 USER node
 EXPOSE 8787

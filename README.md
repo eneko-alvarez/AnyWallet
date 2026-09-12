@@ -142,6 +142,8 @@ Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.
 
 La primera versión se archiva sin publicidad mediante `ios/archive-app-store.sh`; las instrucciones completas para el Mac están en `MAC_APP_STORE.md`. La integración futura de AdMob queda desactivada y señalada en el código; consulta `APP_STORE_Y_PRODUCCION.txt` solo cuando prepares esa actualización.
 
+La portada muestra un botón de App Store en estado «Próximamente» hasta disponer de la ficha pública. Cuando Apple facilite el enlace, añade `APP_STORE_URL=https://apps.apple.com/...` a `server/.env.production` y recrea el contenedor `anywallet-api` para activar la descarga directa.
+
 ## Límites
 
 - Archivo máximo: 15 MB. Los PDF admiten hasta 12 páginas y las imágenes hasta 40 megapíxeles.

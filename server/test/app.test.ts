@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
 import { SQLiteAttestationStore } from "../src/attestation.js";
+import { renderLanding } from "../src/landing.js";
 
 const testChallenge = "A".repeat(43);
 const validDraft = {
@@ -42,12 +43,27 @@ describe("API", () => {
     const website = await app.inject({ method: "GET", url: "/" });
     expect(website.statusCode).toBe(200);
     expect(website.body).toContain("Política de privacidad");
+    expect(website.body).toContain("Tus pases.");
+    expect(website.body).toContain('href="/favicon.png"');
+    expect(website.body).toContain("Próximamente en la");
+    const favicon = await app.inject({ method: "GET", url: "/favicon.png" });
+    expect(favicon.statusCode).toBe(200);
+    expect(favicon.headers["content-type"]).toBe("image/png");
+    expect(favicon.headers["cache-control"]).toBe("public, max-age=86400");
+    expect(favicon.rawPayload.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
     const response = await app.inject({ method: "GET", url: "/privacy" });
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toContain("text/html");
     expect(response.body).toContain("no muestra anuncios");
     expect(response.body).not.toMatch(/AdMob|Google Mobile Ads|User Messaging Platform/);
     expect((await app.inject({ method: "GET", url: "/app-ads.txt" })).statusCode).toBe(404);
+  });
+
+  it("links the download button to the configured App Store listing", () => {
+    const page = renderLanding("https://apps.apple.com/es/app/anywallet/id1234567890");
+    expect(page).toContain('href="https://apps.apple.com/es/app/anywallet/id1234567890"');
+    expect(page).toContain("Descargar AnyWallet en la App Store");
+    expect(page).not.toContain("Próximamente en la");
   });
 
   it("does not expose a PDF upload endpoint", async () => {

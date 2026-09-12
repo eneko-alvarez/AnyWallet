@@ -3,6 +3,7 @@ import rateLimit from "@fastify/rate-limit";
 import Fastify, { LogController, type FastifyRequest } from "fastify";
 import rawBody from "fastify-raw-body";
 import { createHash, randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { z } from "zod";
 import {
   assertRequest as verifyRequestAssertion,
@@ -12,6 +13,7 @@ import {
   type AttestedKey,
 } from "./attestation.js";
 import { config, limits } from "./config.js";
+import { renderLanding } from "./landing.js";
 import { createSignedPass, signingIsConfigured, validateCustomPhoto } from "./pass.js";
 import type { PassDraft } from "./types.js";
 
@@ -23,6 +25,7 @@ const text = (maximum: number) => z.string().trim().max(maximum).refine(
   (value) => !/[\u0000-\u001F\u007F]/.test(value),
   "Control characters are not allowed",
 );
+const brandMark = readFileSync(new URL("../public/brand-mark.png", import.meta.url));
 
 const passDraftSchema = z.object({
   passKind: z.enum(["travel", "membership", "custom"]),
@@ -98,8 +101,10 @@ export async function buildApp(options: BuildAppOptions = {}) {
       return reply.code(400).send({ code: "HTTPS_REQUIRED", message: "HTTPS es obligatorio." });
     }
   });
-  app.addHook("onSend", async (_request, reply, payload) => {
-    reply.header("Cache-Control", "no-store");
+  app.addHook("onSend", async (request, reply, payload) => {
+    reply.header("Cache-Control", request.url === "/brand-mark.png" || request.url === "/favicon.png"
+      ? "public, max-age=86400"
+      : "no-store");
     return payload;
   });
   app.addHook("onClose", async () => {
@@ -110,9 +115,15 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
   app.get("/", async (_request, reply) => reply
     .type("text/html; charset=utf-8")
-    .send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AnyWallet</title><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#172033}h1{line-height:1.2}</style></head>
-<body><h1>AnyWallet</h1><p>Convierte billetes, tarjetas y códigos en pases personales para Apple Wallet desde tu iPhone.</p><p>Los documentos se analizan en el dispositivo. Conserva siempre el original emitido por el proveedor.</p><p><a href="/support">Soporte</a> · <a href="/privacy">Política de privacidad</a></p></body></html>`));
+    .send(renderLanding(config.APP_STORE_URL)));
+
+  app.get("/brand-mark.png", async (_request, reply) => reply
+    .type("image/png")
+    .send(brandMark));
+
+  app.get("/favicon.png", async (_request, reply) => reply
+    .type("image/png")
+    .send(brandMark));
 
   app.get("/privacy", async (_request, reply) => reply
     .type("text/html; charset=utf-8")
