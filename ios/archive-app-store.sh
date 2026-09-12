@@ -9,6 +9,12 @@ app_path="$archive_path/Products/Applications/AnyWallet.app"
 
 command -v xcodegen >/dev/null || { echo "Instala XcodeGen: brew install xcodegen" >&2; exit 1; }
 command -v xcodebuild >/dev/null || { echo "Selecciona Xcode 26 o posterior con xcode-select" >&2; exit 1; }
+xcode_version=$(xcodebuild -version | awk '/^Xcode / { print $2; exit }')
+xcode_major=${xcode_version%%.*}
+if [[ ! "$xcode_major" =~ ^[0-9]+$ ]] || (( xcode_major < 26 )); then
+  echo "App Store Connect exige Xcode 26 o posterior; detectado: $xcode_version" >&2
+  exit 1
+fi
 
 cd "$ios_dir"
 xcodegen generate
@@ -18,6 +24,8 @@ xcodebuild -project AnyWallet.xcodeproj -scheme AnyWallet -configuration Release
 
 api_url=$(/usr/libexec/PlistBuddy -c 'Print :APIBaseURL' "$app_path/Info.plist")
 test "$api_url" = 'https://anywallet.topitup.party' || { echo "APIBaseURL incorrecta: $api_url" >&2; exit 1; }
+attest_required=$(/usr/libexec/PlistBuddy -c 'Print :AppAttestRequired' "$app_path/Info.plist")
+test "$attest_required" = 'YES' || { echo "App Attest no está activado en Release: $attest_required" >&2; exit 1; }
 if /usr/libexec/PlistBuddy -c 'Print :GADApplicationIdentifier' "$app_path/Info.plist" >/dev/null 2>&1; then
   echo 'El archive contiene el App ID de anuncios; no se exporta.' >&2
   exit 1
