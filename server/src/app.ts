@@ -108,6 +108,12 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
   app.get("/health", { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } }, async () => ({ ok: true }));
 
+  app.get("/", async (_request, reply) => reply
+    .type("text/html; charset=utf-8")
+    .send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AnyWallet</title><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#172033}h1{line-height:1.2}</style></head>
+<body><h1>AnyWallet</h1><p>Convierte billetes, tarjetas y códigos en pases personales para Apple Wallet desde tu iPhone.</p><p>Los documentos se analizan en el dispositivo. Conserva siempre el original emitido por el proveedor.</p><p><a href="/support">Soporte</a> · <a href="/privacy">Política de privacidad</a></p></body></html>`));
+
   app.get("/privacy", async (_request, reply) => reply
     .type("text/html; charset=utf-8")
     .send(`<!doctype html>
