@@ -6,6 +6,7 @@
 - Subtítulo: `Tus pases en Apple Wallet`
 - Idioma principal: Español (España)
 - Bundle ID: `com.eneko.anywallet`
+- Versión: `1.0.0` (build `1`)
 - SKU sugerido: `anywallet-ios-001`
 - Categoría principal: Utilidades
 - Categoría secundaria: Viajes

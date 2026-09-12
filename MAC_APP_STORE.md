@@ -1,11 +1,12 @@
-# AnyWallet 1.0: archivo y envío desde el Mac
+# AnyWallet 1.0.0: archivo y envío desde el Mac
 
 La primera versión no incluye publicidad. El archivo `.ipa` solo se puede
 generar en macOS con Xcode 26 o posterior y un perfil de distribución válido.
 
 Antes de ejecutar los comandos, confirma en Apple Developer que el App ID
 `com.eneko.anywallet` pertenece al equipo `B6757Q5N7U` y tiene App Attest
-activado. En App Store Connect, crea la app iOS con ese Bundle ID. Inicia
+activado. En App Store Connect, crea la app iOS con ese Bundle ID, versión
+`1.0.0` y build `1`. Inicia
 sesión con el mismo equipo en Xcode > Settings > Accounts.
 
 Desde la raíz del repositorio en el Mac:
