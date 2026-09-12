@@ -24,4 +24,4 @@ AnyWallet no vende los datos introducidos en los pases. Los servicios de Apple n
 
 ## Derechos
 
-Para consultas de privacidad o solicitudes de acceso y eliminación, escribe a alvarez.mendia.eneko@gmail.com.
+Para consultas de privacidad o solicitudes de acceso y eliminación, escribe a anywallet@topitup.party.

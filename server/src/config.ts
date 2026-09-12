@@ -15,7 +15,7 @@ export const config = z
     PASS_TYPE_IDENTIFIER: z.string().startsWith("pass.").default("pass.com.example.anywallet"),
     APPLE_TEAM_IDENTIFIER: z.string().trim().min(1).default("YOURTEAMID"),
     PASS_ORGANIZATION_NAME: z.string().trim().min(1).default("AnyWallet"),
-    PASS_CONTACT_EMAIL: z.string().email().default("support@example.com"),
+    PASS_CONTACT_EMAIL: z.string().email().default("anywallet@topitup.party"),
     PASS_SIGNER_CERT_PATH: optionalPath,
     PASS_SIGNER_KEY_PATH: optionalPath,
     PASS_WWDR_CERT_PATH: optionalPath,
