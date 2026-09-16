@@ -16,7 +16,7 @@ export const config = z
     APPLE_TEAM_IDENTIFIER: z.string().trim().min(1).default("YOURTEAMID"),
     PASS_ORGANIZATION_NAME: z.string().trim().min(1).default("AnyWallet"),
     PASS_CONTACT_EMAIL: z.string().email().default("anywallet@topitup.party"),
-    APP_STORE_URL: z.url().refine((value) => value.startsWith("https://apps.apple.com/"), "Use an App Store URL").optional(),
+    APP_STORE_URL: z.url().refine((value) => value.startsWith("https://apps.apple.com/"), "Use an App Store URL").default("https://apps.apple.com/us/app/anywallet/id6811444719"),
     PASS_SIGNER_CERT_PATH: optionalPath,
     PASS_SIGNER_KEY_PATH: optionalPath,
     PASS_WWDR_CERT_PATH: optionalPath,

@@ -45,7 +45,8 @@ describe("API", () => {
     expect(website.body).toContain("Política de privacidad");
     expect(website.body).toContain("Tus pases.");
     expect(website.body).toContain('href="/favicon.png"');
-    expect(website.body).toContain("Próximamente en la");
+    expect(website.body).toContain("Ya disponible en la App Store");
+    expect(website.body).toContain('href="https://apps.apple.com/us/app/anywallet/id6811444719"');
     const favicon = await app.inject({ method: "GET", url: "/favicon.png" });
     expect(favicon.statusCode).toBe(200);
     expect(favicon.headers["content-type"]).toBe("image/png");
@@ -66,11 +67,18 @@ describe("API", () => {
     expect(response.body).toBe("google.com, pub-3290168130965932, DIRECT, f08c47fec0942fa0\n");
   });
 
-  it("links the download button to the configured App Store listing", () => {
-    const page = renderLanding("https://apps.apple.com/es/app/anywallet/id1234567890");
-    expect(page).toContain('href="https://apps.apple.com/es/app/anywallet/id1234567890"');
-    expect(page).toContain("Descargar AnyWallet en la App Store");
-    expect(page).not.toContain("Próximamente en la");
+  it("serves the English landing and localized support link", async () => {
+    app = await buildApp();
+    const page = await app.inject({ method: "GET", url: "/?lang=en" });
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('<html lang="en">');
+    expect(page.body).toContain("Now on the App Store");
+    expect(page.body).toContain('href="https://apps.apple.com/us/app/anywallet/id6811444719"');
+    expect(page.body).toContain('href="/support?lang=en"');
+    expect(page.body).not.toContain("Próximamente");
+    const support = await app.inject({ method: "GET", url: "/support?lang=en" });
+    expect(support.body).toContain("AnyWallet Support");
+    expect(renderLanding("https://apps.apple.com/us/app/anywallet/id6811444719", "es")).toContain("Descargar AnyWallet en la App Store");
   });
 
   it("does not expose a PDF upload endpoint", async () => {

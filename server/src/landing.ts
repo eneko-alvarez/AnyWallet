@@ -1,15 +1,16 @@
+import type { Language } from "./localization.js";
+
 const appleIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.05 12.54c.02-2.12 1.73-3.12 1.8-3.17a3.86 3.86 0 0 0-3.04-1.64c-1.28-.13-2.52.77-3.17.77-.66 0-1.64-.76-2.71-.74A4 4 0 0 0 6.56 9.8c-1.46 2.54-.37 6.27 1.03 8.32.7 1.01 1.52 2.14 2.59 2.1 1.04-.04 1.43-.67 2.68-.67 1.23 0 1.59.67 2.68.64 1.11-.02 1.81-1.01 2.48-2.03a8.36 8.36 0 0 0 1.13-2.31 3.65 3.65 0 0 1-2.1-3.31ZM14.98 6.38A3.74 3.74 0 0 0 15.83 3a3.78 3.78 0 0 0-2.45 1.17 3.58 3.58 0 0 0-.89 3.28 3.15 3.15 0 0 0 2.49-1.07Z"/></svg>`;
 
 const escapeAttribute = (value: string) => value.replace(/[&<>"']/g, (character) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 })[character] ?? character);
 
-export function renderLanding(appStoreUrl?: string): string {
-  const storeButton = appStoreUrl
-    ? `<a class="store-button" href="${escapeAttribute(appStoreUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Descargar AnyWallet en la App Store">${appleIcon}<span><small>Descargar en la</small><strong>App Store</strong></span><span class="store-arrow" aria-hidden="true">↗</span></a>`
-    : `<button class="store-button store-button--soon" type="button" disabled aria-label="Próximamente en la App Store">${appleIcon}<span><small>Próximamente en la</small><strong>App Store</strong></span></button>`;
+export function renderLanding(appStoreUrl: string, language: Language = "es"): string {
+  const storeButton = `<a class="store-button" href="${escapeAttribute(appStoreUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Descargar AnyWallet en la App Store">${appleIcon}<span><small>Descargar en la</small><strong>App Store</strong></span><span class="store-arrow" aria-hidden="true">↗</span></a>`;
+  const lang = `?lang=${language}`;
 
-  return `<!doctype html>
+  const html = `<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -38,6 +39,7 @@ export function renderLanding(appStoreUrl?: string): string {
     .brand img{width:39px;height:39px;object-fit:contain}
     .nav{display:flex;align-items:center;gap:34px;color:#53545a;font-size:14px;font-weight:600}
     .nav a:hover,.footer-links a:hover{text-decoration:underline;text-underline-offset:5px}
+    .language-switch{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.language-switch a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
     .nav-download{border:1px solid #d7d7d5;padding:11px 17px;border-radius:999px;color:var(--ink);transition:background .2s,border-color .2s}
     .nav-download:hover{background:#fff;border-color:#aaa}
     .hero{position:relative;display:grid;grid-template-columns:1fr 1fr;align-items:center;min-height:660px;gap:30px;padding:72px 0 92px;isolation:isolate}
@@ -56,7 +58,6 @@ export function renderLanding(appStoreUrl?: string): string {
     .store-button small{font-size:11px;font-weight:500;letter-spacing:.01em}
     .store-button strong{font-size:21px;letter-spacing:-.035em;font-weight:680}
     .store-arrow{font-size:17px;margin-left:auto;align-self:flex-start;opacity:.7}
-    .store-button--soon{background:#333438;cursor:default;box-shadow:none}
     .hero-note{font-size:13px;color:#77787d}
     .visual{position:relative;width:min(100%,515px);height:490px;justify-self:end;display:grid;place-items:center}
     .visual-halo{position:absolute;width:430px;height:430px;border:1px solid #f5cfc4;border-radius:50%;transform:translate(14px,6px)}
@@ -103,8 +104,8 @@ export function renderLanding(appStoreUrl?: string): string {
     .site-footer .brand img{width:26px;height:26px}
     .footer-links{display:flex;flex-wrap:wrap;gap:22px}
     @media(max-width:900px){.hero{min-height:0;padding:78px 0 64px;grid-template-columns:1fr 1fr;gap:0}.visual{transform:scale(.8);transform-origin:center right;width:450px;max-width:100%;height:460px}h1{font-size:clamp(54px,7vw,74px)}.hero-copy{font-size:17px}}
-    @media(max-width:700px){.wrap{width:min(100% - 36px,520px)}.site-header{height:75px}.nav{gap:17px;font-size:13px}.nav a:first-child{display:none}.nav-download{padding:9px 13px}.hero{display:flex;flex-direction:column;align-items:stretch;padding:67px 0 36px}.hero::before{width:100%;height:50%;top:42%;right:0}h1{font-size:clamp(56px,12vw,78px);margin:20px 0}.hero-copy{font-size:18px;line-height:1.5}.hero-actions{margin-top:26px}.visual{align-self:center;transform:scale(.8);transform-origin:center center;margin-top:2px;margin-bottom:-55px;width:460px;height:430px}.steps{padding:54px 0 64px}.section-head{display:block}.section-head p{margin-top:16px}.step-grid{grid-template-columns:1fr}.step{min-height:0;padding:23px}.step-icon{margin-bottom:20px}.privacy-panel{padding:34px 30px;margin-bottom:52px}.privacy-symbol{display:none}.site-footer{align-items:flex-start;flex-direction:column;gap:19px}}
-    @media(max-width:430px){.nav a:nth-child(2){display:none}.visual{transform:scale(.66);width:440px;margin-top:-40px;margin-bottom:-110px}.hero-note{max-width:100px}.pass{width:356px}.float-chip--bottom{right:-12px}}
+    @media(max-width:700px){.wrap{width:min(100% - 36px,520px)}.site-header{height:75px}.nav{gap:12px;font-size:13px}.nav > a:first-child{display:none}.nav-download{padding:9px 13px}.hero{display:flex;flex-direction:column;align-items:stretch;padding:67px 0 36px}.hero::before{width:100%;height:50%;top:42%;right:0}h1{font-size:clamp(56px,12vw,78px);margin:20px 0}.hero-copy{font-size:18px;line-height:1.5}.hero-actions{margin-top:26px}.visual{align-self:center;transform:scale(.8);transform-origin:center center;margin-top:2px;margin-bottom:-55px;width:460px;height:430px}.steps{padding:54px 0 64px}.section-head{display:block}.section-head p{margin-top:16px}.step-grid{grid-template-columns:1fr}.step{min-height:0;padding:23px}.step-icon{margin-bottom:20px}.privacy-panel{padding:34px 30px;margin-bottom:52px}.privacy-symbol{display:none}.site-footer{align-items:flex-start;flex-direction:column;gap:19px}}
+    @media(max-width:430px){.nav > a:nth-child(2),.nav-download{display:none}.visual{transform:scale(.66);width:440px;margin-top:-40px;margin-bottom:-110px}.hero-note{max-width:100px}.pass{width:356px}.float-chip--bottom{right:-12px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}a.store-button,.nav-download{transition:none}}
   </style>
 </head>
@@ -112,12 +113,12 @@ export function renderLanding(appStoreUrl?: string): string {
   <a class="skip" href="#main">Saltar al contenido</a>
   <header class="site-header wrap">
     <a class="brand" href="/" aria-label="AnyWallet, inicio"><img src="/brand-mark.png" alt="" width="39" height="39">AnyWallet</a>
-    <nav class="nav" aria-label="Principal"><a href="#como-funciona">Cómo funciona</a><a href="/support">Soporte</a><a class="nav-download" href="#descargar">Descargar app</a></nav>
+    <nav class="nav" aria-label="Principal"><a href="#como-funciona">Cómo funciona</a><a href="/support${lang}">Soporte</a><a class="nav-download" href="#descargar">Descargar app</a><span class="language-switch" role="group" aria-label="Language / Idioma"><a href="/?lang=es" lang="es" ${language === "es" ? 'aria-current="page"' : ""}>ES</a><span aria-hidden="true">/</span><a href="/?lang=en" lang="en" ${language === "en" ? 'aria-current="page"' : ""}>EN</a></span></nav>
   </header>
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-content">
-        <div class="eyebrow">Hecha para iPhone</div>
+        <div class="eyebrow">Ya disponible en la App Store</div>
         <h1 id="hero-title">Tus pases.<span>En su sitio.</span></h1>
         <p class="hero-copy">Billetes, tarjetas y códigos, listos para Apple Wallet. Importa un documento o crea un pase desde cero, en unos pocos toques.</p>
         <div class="hero-actions" id="descargar">${storeButton}<span class="hero-note">Para iPhone · Sin anuncios</span></div>
@@ -140,7 +141,54 @@ export function renderLanding(appStoreUrl?: string): string {
     </section>
     <section class="privacy-panel wrap" aria-labelledby="privacy-title"><div><span class="eyebrow">Tu espacio, tus datos</span><h2 id="privacy-title">Tus documentos se analizan en tu iPhone.</h2><p>El archivo original no se sube. Solo se envían los datos necesarios para firmar el pase que decides crear.</p></div><div class="privacy-symbol" aria-hidden="true">⌁</div></section>
   </main>
-  <footer class="site-footer wrap"><a class="brand" href="/"><img src="/brand-mark.png" alt="" width="26" height="26">AnyWallet</a><span>Hecho para llevar lo importante contigo.</span><div class="footer-links"><a href="/privacy">Política de privacidad</a><a href="/support">Soporte</a></div></footer>
+  <footer class="site-footer wrap"><a class="brand" href="/"><img src="/brand-mark.png" alt="" width="26" height="26">AnyWallet</a><span>Hecho para llevar lo importante contigo.</span><div class="footer-links"><a href="/privacy${lang}">Política de privacidad</a><a href="/support${lang}">Soporte</a></div></footer>
 </body>
 </html>`;
+  if (language === "es") return html;
+  return translateLanding(html);
+}
+
+function translateLanding(html: string): string {
+  const translations: [string, string][] = [
+    ['<html lang="es">', '<html lang="en">'],
+    ["Convierte billetes, tarjetas y códigos en pases para Apple Wallet. Importa, revisa y guarda desde tu iPhone con AnyWallet.", "Turn tickets, cards, and codes into Apple Wallet passes. Import, review, and save them on your iPhone with AnyWallet."],
+    ["AnyWallet — Tus pases, en su sitio", "AnyWallet — Your passes, in their place"],
+    ["Billetes, tarjetas y códigos, listos para Apple Wallet.", "Tickets, cards, and codes, ready for Apple Wallet."],
+    ["Saltar al contenido", "Skip to content"],
+    ["AnyWallet, inicio", "AnyWallet, home"],
+    ['aria-label="Principal"', 'aria-label="Main navigation"'],
+    ["Cómo funciona", "How it works"],
+    ["Soporte", "Support"],
+    ["Descargar app", "Download app"],
+    ["Ya disponible en la App Store", "Now on the App Store"],
+    ["Tus pases.", "Your passes."],
+    ["En su sitio.", "In their place."],
+    ["Importa un documento o crea un pase desde cero, en unos pocos toques.", "Import a document or create a pass from scratch in just a few taps."],
+    ["Descargar AnyWallet en la App Store", "Download AnyWallet on the App Store"],
+    ["Descargar en la", "Download on the"],
+    ["Para iPhone · Sin anuncios", "For iPhone · No ads"],
+    ["Ilustración de un billete y una tarjeta convertidos en pases de Wallet", "Illustration of a ticket and a card turned into Wallet passes"],
+    ["Tu tarjeta", "Your card"],
+    ["Todo a mano.", "All in one place."],
+    ["Tu billete", "Your ticket"],
+    ["Listo para Wallet", "Ready for Wallet"],
+    ["Importado en segundos", "Imported in seconds"],
+    ["Siempre contigo", "Always with you"],
+    ["Así de fácil", "It's that easy"],
+    ["Del documento a Wallet.", "From document to Wallet."],
+    ["Elige lo que quieres guardar. AnyWallet te ayuda con el resto.", "Choose what to save. AnyWallet helps with the rest."],
+    [">Importa</h3>", ">Import</h3>"],
+    ["Abre un PDF o una imagen de tu billete o tarjeta.", "Open a PDF or an image of your ticket or card."],
+    [">Revisa</h3>", ">Review</h3>"],
+    ["Comprueba los datos, ajusta el pase o créalo desde cero.", "Check the details, adjust the pass, or create one from scratch."],
+    ["Añade a Wallet", "Add to Wallet"],
+    ["Guárdalo en Apple Wallet y llévalo contigo.", "Save it to Apple Wallet and take it with you."],
+    ["Tu espacio, tus datos", "Your space, your data"],
+    ["Tus documentos se analizan en tu iPhone.", "Your documents are analyzed on your iPhone."],
+    ["El archivo original no se sube. Solo se envían los datos necesarios para firmar el pase que decides crear.", "The original file is never uploaded. Only the details needed to sign the pass you choose to create are sent."],
+    ["Hecho para llevar lo importante contigo.", "Made to keep what matters with you."],
+    ["Política de privacidad", "Privacy policy"],
+  ];
+  for (const [spanish, english] of translations) html = html.replaceAll(spanish, english);
+  return html;
 }
