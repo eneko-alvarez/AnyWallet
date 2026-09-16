@@ -18,6 +18,7 @@ server/fixtures/generated/
 ios/AnyWallet.xcodeproj/
 ios/DerivedData*/
 ios/build/
+ios/.env.ads.production
 ios/*.xcworkspace/xcuserdata/
 *.xcuserstate
 *.xcarchive

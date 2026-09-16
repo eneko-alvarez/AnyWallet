@@ -105,7 +105,7 @@ export function renderLanding(appStoreUrl: string, language: Language = "es"): s
     .footer-links{display:flex;flex-wrap:wrap;gap:22px}
     @media(max-width:900px){.hero{min-height:0;padding:78px 0 64px;grid-template-columns:1fr 1fr;gap:0}.visual{transform:scale(.8);transform-origin:center right;width:450px;max-width:100%;height:460px}h1{font-size:clamp(54px,7vw,74px)}.hero-copy{font-size:17px}}
     @media(max-width:700px){.wrap{width:min(100% - 36px,520px)}.site-header{height:75px}.nav{gap:12px;font-size:13px}.nav > a:first-child{display:none}.nav-download{padding:9px 13px}.hero{display:flex;flex-direction:column;align-items:stretch;padding:67px 0 36px}.hero::before{width:100%;height:50%;top:42%;right:0}h1{font-size:clamp(56px,12vw,78px);margin:20px 0}.hero-copy{font-size:18px;line-height:1.5}.hero-actions{margin-top:26px}.visual{align-self:center;transform:scale(.8);transform-origin:center center;margin-top:2px;margin-bottom:-55px;width:460px;height:430px}.steps{padding:54px 0 64px}.section-head{display:block}.section-head p{margin-top:16px}.step-grid{grid-template-columns:1fr}.step{min-height:0;padding:23px}.step-icon{margin-bottom:20px}.privacy-panel{padding:34px 30px;margin-bottom:52px}.privacy-symbol{display:none}.site-footer{align-items:flex-start;flex-direction:column;gap:19px}}
-    @media(max-width:430px){.nav > a:nth-child(2),.nav-download{display:none}.visual{transform:scale(.66);width:440px;margin-top:-40px;margin-bottom:-110px}.hero-note{max-width:100px}.pass{width:356px}.float-chip--bottom{right:-12px}}
+    @media(max-width:430px){.nav > a:nth-child(2),.nav-download{display:none}.visual{transform:scale(.66);width:440px;margin-top:-40px;margin-bottom:-110px}.hero-note{max-width:160px}.pass{width:356px}.float-chip--bottom{right:-12px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}a.store-button,.nav-download{transition:none}}
   </style>
 </head>
@@ -121,7 +121,7 @@ export function renderLanding(appStoreUrl: string, language: Language = "es"): s
         <div class="eyebrow">Ya disponible en la App Store</div>
         <h1 id="hero-title">Tus pases.<span>En su sitio.</span></h1>
         <p class="hero-copy">Billetes, tarjetas y códigos, listos para Apple Wallet. Importa un documento o crea un pase desde cero, en unos pocos toques.</p>
-        <div class="hero-actions" id="descargar">${storeButton}<span class="hero-note">Para iPhone · Sin anuncios</span></div>
+        <div class="hero-actions" id="descargar">${storeButton}<span class="hero-note">Gratis · Anuncios desde 1.1</span></div>
       </div>
       <div class="visual" role="img" aria-label="Ilustración de un billete y una tarjeta convertidos en pases de Wallet">
         <div class="visual-halo" aria-hidden="true"></div>
@@ -166,7 +166,7 @@ function translateLanding(html: string): string {
     ["Importa un documento o crea un pase desde cero, en unos pocos toques.", "Import a document or create a pass from scratch in just a few taps."],
     ["Descargar AnyWallet en la App Store", "Download AnyWallet on the App Store"],
     ["Descargar en la", "Download on the"],
-    ["Para iPhone · Sin anuncios", "For iPhone · No ads"],
+    ["Gratis · Anuncios desde 1.1", "Free · Ads from 1.1"],
     ["Ilustración de un billete y una tarjeta convertidos en pases de Wallet", "Illustration of a ticket and a card turned into Wallet passes"],
     ["Tu tarjeta", "Your card"],
     ["Todo a mano.", "All in one place."],

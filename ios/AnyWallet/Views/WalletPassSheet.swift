@@ -28,15 +28,17 @@ struct WalletPassSheet: UIViewControllerRepresentable {
 
     final class Coordinator: NSObject, PKAddPassesViewControllerDelegate {
         private let pass: PKPass?
+        private let wasAlreadyInLibrary: Bool
         private let completion: (Bool) -> Void
 
         init(data: Data, completion: @escaping (Bool) -> Void) {
             pass = try? PKPass(data: data)
+            wasAlreadyInLibrary = pass.map { PKPassLibrary().containsPass($0) } ?? false
             self.completion = completion
         }
 
         func addPassesViewControllerDidFinish(_ controller: PKAddPassesViewController) {
-            let wasAdded = pass.map { PKPassLibrary().containsPass($0) } ?? false
+            let wasAdded = !wasAlreadyInLibrary && (pass.map { PKPassLibrary().containsPass($0) } ?? false)
             completion(wasAdded)
         }
     }

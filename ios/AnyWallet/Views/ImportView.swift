@@ -6,7 +6,8 @@ struct ImportView: View {
     @Binding var selectedPhoto: PhotosPickerItem?
     let onImportFile: () -> Void
     let onCreateCustom: () -> Void
-    // Publicidad futura: reponer showsAdPrivacyOptions y onAdPrivacyOptions.
+    let showsAdPrivacyOptions: Bool
+    let onAdPrivacyOptions: () -> Void
 
     @State private var isSourceDialogPresented = false
     @State private var isPhotoPickerPresented = false
@@ -113,7 +114,11 @@ struct ImportView: View {
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(AppTheme.ink)
             Spacer()
-            // Publicidad futura: mostrar aqui el acceso de UMP cuando sea requerido.
+            if showsAdPrivacyOptions {
+                Button(L10n.text("Opciones de privacidad"), action: onAdPrivacyOptions)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.muted)
+            }
         }
     }
 }

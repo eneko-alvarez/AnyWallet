@@ -1,6 +1,6 @@
 # Política de privacidad de AnyWallet
 
-Última actualización: 13 de septiembre de 2026.
+Última actualización: 17 de septiembre de 2026.
 
 AnyWallet convierte documentos elegidos por el usuario en pases personales para Apple Wallet.
 
@@ -18,7 +18,9 @@ La comunicación de producción utiliza HTTPS. Los pases se firman con un certif
 
 ## Publicidad y terceros
 
-Esta versión de AnyWallet no muestra anuncios ni integra redes publicitarias.
+Las versiones de AnyWallet que incluyen publicidad pueden mostrar un anuncio no personalizado después de añadir correctamente un pase a Apple Wallet. Ver el anuncio nunca es necesario para crear el pase.
+
+Google AdMob y su plataforma de consentimiento pueden tratar la dirección IP (para estimar la ubicación aproximada), identificadores de la aplicación o del dispositivo, interacciones con anuncios y datos de diagnóstico. Los campos y códigos del pase no se envían a Google para publicidad. Cuando se requiera, la app muestra un mensaje de consentimiento y un acceso a las opciones de privacidad. Consulta también la [política de privacidad de Google](https://policies.google.com/privacy).
 
 AnyWallet no vende los datos introducidos en los pases. Los servicios de Apple necesarios para App Attest y Wallet están sujetos a las políticas de Apple.
 

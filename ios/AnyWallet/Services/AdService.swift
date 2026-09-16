@@ -1,6 +1,3 @@
-// Publicidad desactivada en la primera version. Definir ANYWALLET_ADS solo
-// cuando se restauren el paquete, los IDs y las declaraciones de privacidad.
-#if ANYWALLET_ADS
 import Foundation
 import GoogleMobileAds
 import UserMessagingPlatform
@@ -12,14 +9,21 @@ final class AdService: NSObject, ObservableObject, FullScreenContentDelegate {
     private var interstitial: InterstitialAd?
     private var didStartAds = false
     private var isLoading = false
+    private var lastPresentedAt: Date?
 
     func prepare() {
         Task { await gatherConsentAndLoad() }
     }
 
     func showAfterSuccessfulPass() {
-        guard let interstitial else { return }
+        guard ConsentInformation.shared.canRequestAds else { return }
+        guard let interstitial else {
+            Task { await loadInterstitial() }
+            return
+        }
+        if let lastPresentedAt, Date().timeIntervalSince(lastPresentedAt) < 120 { return }
         self.interstitial = nil
+        lastPresentedAt = Date()
         Task {
             try? await Task.sleep(for: .milliseconds(450))
             interstitial.present(from: nil)
@@ -30,6 +34,11 @@ final class AdService: NSObject, ObservableObject, FullScreenContentDelegate {
         Task {
             try? await ConsentForm.presentPrivacyOptionsForm(from: nil)
             refreshPrivacyStatus()
+            if ConsentInformation.shared.canRequestAds {
+                startAndLoadIfNeeded()
+            } else {
+                interstitial = nil
+            }
         }
     }
 
@@ -53,6 +62,8 @@ final class AdService: NSObject, ObservableObject, FullScreenContentDelegate {
     private func startAndLoadIfNeeded() {
         if !didStartAds {
             didStartAds = true
+            MobileAds.shared.requestConfiguration.setPublisherFirstPartyIDEnabled(false)
+            MobileAds.shared.requestConfiguration.publisherPrivacyPersonalizationState = .disabled
             MobileAds.shared.start()
         }
         Task { await loadInterstitial() }
@@ -85,4 +96,3 @@ final class AdService: NSObject, ObservableObject, FullScreenContentDelegate {
         Task { await loadInterstitial() }
     }
 }
-#endif

@@ -6,7 +6,7 @@
 - Subtítulo: `Tus pases en Apple Wallet`
 - Idioma principal: Español (España)
 - Bundle ID: `com.eneko.anywallet`
-- Versión: `1.0.0` (build `1`)
+- Versión: `1.1` (build `2`)
 - SKU sugerido: `anywallet-ios-001`
 - Categoría principal: Utilidades
 - Categoría secundaria: Viajes
@@ -35,7 +35,7 @@ Lo que puedes hacer:
 • Editar los datos antes de crear cada pase.
 • Añadir el resultado directamente a Apple Wallet.
 
-No necesitas crear una cuenta. Esta primera versión no incluye anuncios ni suscripciones.
+No necesitas crear una cuenta ni contratar una suscripción. Tras añadir correctamente un pase a Wallet, la app puede mostrar un anuncio.
 
 El documento original se analiza en tu iPhone y no se sube. Para firmar el pase solo se envían temporalmente los campos revisados, el código y, si la añades, una foto comprimida.
 
@@ -51,7 +51,7 @@ AnyWallet procesa los PDF y las imágenes localmente. El servidor solo recibe el
 
 Para probarla, pulsa “Crear pase”, importa un PDF o una imagen que contenga un QR o código de barras, revisa los campos y pulsa “Añadir a Apple Wallet”. También se puede usar “Crear desde cero” sin importar ningún archivo.
 
-La versión 1.0 no contiene publicidad ni SDK publicitarios.
+La versión 1.1 puede mostrar un anuncio intersticial no personalizado solo después de que el usuario añada correctamente un pase a Apple Wallet y cierre la hoja de Wallet. El anuncio no es necesario para crear el pase. La app usa Google AdMob y User Messaging Platform para el consentimiento.
 
 Los documentos pertenecen al usuario y se usan únicamente para crear copias personales. Los pases indican que AnyWallet es el firmante y que no están emitidos ni respaldados por el operador original.
 
@@ -60,7 +60,8 @@ No se necesitan credenciales ni una cuenta de demostración.
 ## Pendientes manuales de la ficha
 
 - Completar el cuestionario de derechos de contenido indicando que la app accede a documentos aportados por el usuario para uso personal y no redistribuye contenido de terceros.
-- Completar el cuestionario de edad según el contenido real de la app, que no tiene publicidad en esta versión.
+- Revisar el cuestionario de edad y las categorías de anuncios permitidas en AdMob.
+- Actualizar App Privacy según el informe de privacidad del archive 1.1 y los datos declarados por los SDK de Google.
 - Completar el estado DSA y los datos de contacto requeridos para distribuir en la UE.
 - Subir al menos una captura sin transparencia para iPhone de 6,9 pulgadas; se recomiendan tres: inicio, edición y vista previa.
 - Seleccionar el build, contestar export compliance y elegir publicación manual tras la aprobación.

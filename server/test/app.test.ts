@@ -38,7 +38,7 @@ describe("API", () => {
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
-  it("publishes a no-ads privacy policy for the first release", async () => {
+  it("publishes the privacy policy and developer website", async () => {
     app = await buildApp();
     const website = await app.inject({ method: "GET", url: "/" });
     expect(website.statusCode).toBe(200);
@@ -46,6 +46,8 @@ describe("API", () => {
     expect(website.body).toContain("Tus pases.");
     expect(website.body).toContain('href="/favicon.png"');
     expect(website.body).toContain("Ya disponible en la App Store");
+    expect(website.body).toContain("Gratis · Anuncios desde 1.1");
+    expect(website.body).not.toContain("Sin anuncios");
     expect(website.body).toContain('href="https://apps.apple.com/us/app/anywallet/id6811444719"');
     const favicon = await app.inject({ method: "GET", url: "/favicon.png" });
     expect(favicon.statusCode).toBe(200);
@@ -55,8 +57,8 @@ describe("API", () => {
     const response = await app.inject({ method: "GET", url: "/privacy" });
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toContain("text/html");
-    expect(response.body).toContain("no muestra anuncios");
-    expect(response.body).not.toMatch(/AdMob|Google Mobile Ads|User Messaging Platform/);
+    expect(response.body).toContain("Google AdMob");
+    expect(response.body).toContain("Los campos y códigos del pase no se envían a Google");
   });
 
   it("publishes the AdMob ownership record as plain text", async () => {
@@ -73,6 +75,7 @@ describe("API", () => {
     expect(page.statusCode).toBe(200);
     expect(page.body).toContain('<html lang="en">');
     expect(page.body).toContain("Now on the App Store");
+    expect(page.body).toContain("Free · Ads from 1.1");
     expect(page.body).toContain('href="https://apps.apple.com/us/app/anywallet/id6811444719"');
     expect(page.body).toContain('href="/support?lang=en"');
     expect(page.body).not.toContain("Próximamente");

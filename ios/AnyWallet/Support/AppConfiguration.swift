@@ -19,5 +19,11 @@ enum AppConfiguration {
         return value.caseInsensitiveCompare("YES") == .orderedSame || value == "1" || value.lowercased() == "true"
     }
 
-    // Publicidad futura: restaurar interstitialAdUnitID al reactivar AdService.
+    static var interstitialAdUnitID: String {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "InterstitialAdUnitID") as? String,
+              value.hasPrefix("ca-app-pub-"), value.contains("/") else {
+            preconditionFailure("InterstitialAdUnitID is missing from Info.plist")
+        }
+        return value
+    }
 }

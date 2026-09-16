@@ -35,7 +35,7 @@ describe("localization", () => {
     try {
       const privacy = await app.inject({ method: "GET", url: "/privacy?lang=en" });
       expect(privacy.body).toContain('<html lang="en">');
-      expect(privacy.body).toContain("does not display ads");
+      expect(privacy.body).toContain("Google AdMob");
       const spanish = await app.inject({ method: "GET", url: "/privacy?lang=es" });
       expect(spanish.body).toContain('<html lang="es">');
       const error = await app.inject({ method: "GET", url: "/v1/passes/expired", headers: { "accept-language": "en" } });

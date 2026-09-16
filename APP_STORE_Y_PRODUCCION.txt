@@ -1,9 +1,9 @@
 ANYWALLET — CHECKLIST DE APP STORE, ANUNCIOS Y PRODUCCIÓN
 Actualizado: 13/09/2026
 
-ESTADO DE LA VERSION 1.0: SIN ANUNCIOS. Todo lo relativo a AdMob en este
-documento queda aplazado a una actualizacion posterior a la publicacion.
-No pongas IDs reales ni de prueba en el archive de la primera version.
+ESTADO DE LA VERSION 1.0: SIN ANUNCIOS. La versión 1.1 incorpora AdMob;
+los IDs reales se guardan fuera de Git y solo se inyectan en el archive de
+distribución después de completar consentimiento, privacidad y verificación.
 
 ESTADO QUE YA DEJA EL REPOSITORIO
 
@@ -12,8 +12,9 @@ ESTADO QUE YA DEJA EL REPOSITORIO
 - Foto con proporción 1:1, 3:4, 4:3 o 16:9. Se reduce en el iPhone a <= 280 KB.
 - El servidor no guarda documentos ni fotos. El borrador vive en RAM hasta descargarlo una vez o durante 10 minutos.
 - Loading screen sencilla al iniciar y overlay durante análisis/firma.
-- El codigo de AdMob/UMP queda conservado pero excluido del build; no se enlaza
-  el SDK, no se hacen solicitudes de anuncios y la ficha 1.0 no declara publicidad.
+- La versión 1.0 no enlaza SDK publicitarios ni hace solicitudes de anuncios.
+- La versión 1.1 enlaza AdMob y UMP, con anuncios de prueba en Debug e IDs reales
+  obligatorios para el archive de distribución.
 
 1. APPLE: ¿HAY QUE OFRECER PREMIUM SIN ANUNCIOS?
 
@@ -58,23 +59,15 @@ https://support.google.com/admob/answer/9989980
 
 4. PONER LAS CLAVES REALES SIN GUARDARLAS EN GIT
 
-No sustituir los IDs de prueba en el repositorio. Pasarlos al archive de producción desde CI o terminal:
+No sustituir los IDs de prueba en el repositorio. Guardar los IDs reales en
+`ios/.env.ads.production` (excluido de Git) y archivar con el script de la versión 1.1:
 
-cd ios
-xcodegen generate
-xcodebuild archive \
-  -project AnyWallet.xcodeproj \
-  -scheme AnyWallet \
-  -configuration Release \
-  -archivePath build/AnyWallet.xcarchive \
-  API_BASE_URL=https://api.SUBDOMINIO-REAL.TLD \
-  ADMOB_APP_ID=ca-app-pub-APP_ID_REAL \
-  ADMOB_INTERSTITIAL_ID=ca-app-pub-AD_UNIT_REAL
+./ios/archive-app-store.sh
 
 Verificar el archive antes de subir:
 
-/usr/libexec/PlistBuddy -c 'Print :GADApplicationIdentifier' build/AnyWallet.xcarchive/Products/Applications/AnyWallet.app/Info.plist
-/usr/libexec/PlistBuddy -c 'Print :InterstitialAdUnitID' build/AnyWallet.xcarchive/Products/Applications/AnyWallet.app/Info.plist
+/usr/libexec/PlistBuddy -c 'Print :GADApplicationIdentifier' ios/build/AnyWallet.xcarchive/Products/Applications/AnyWallet.app/Info.plist
+/usr/libexec/PlistBuddy -c 'Print :InterstitialAdUnitID' ios/build/AnyWallet.xcarchive/Products/Applications/AnyWallet.app/Info.plist
 
 Nunca usar el ad unit real en simulador o durante pruebas internas repetitivas. Google puede suspender la cuenta por tráfico inválido.
 
@@ -109,6 +102,8 @@ En App Store Connect declarar, como mínimo y según el Privacy Report final del
 - Finalidades de Third-Party Advertising y Analytics/diagnóstico donde correspondan.
 
 Esta integración no pide ATT ni accede voluntariamente al IDFA. Mantener desactivadas configuraciones publicitarias que requieran tracking entre apps/sitios. En “Data Used to Track You”, responder No solo después de confirmar en AdMob y en el App Privacy Report que no se enlaza información con datos de otras empresas para targeting/medición. Si se decide activar publicidad personalizada que constituya tracking, entonces hay que añadir NSUserTrackingUsageDescription, solicitar ATT antes de inicializar anuncios y actualizar PrivacyInfo, política y ficha.
+
+La versión 1.1 configura las solicitudes como anuncios no personalizados y desactiva el Publisher first-party ID. El manifiesto del SDK Google Mobile Ads 13.9.0 declara Device ID con Tracking=true como capacidad del SDK. Revisar el informe de privacidad del archive y el uso efectivo antes de responder el cuestionario de App Privacy; no asumir que la ausencia de ATT basta por sí sola.
 
 No marcar la app como Kids Category. Elegir una edad compatible con el contenido publicitario configurado. Revisar que AdMob bloquee categorías sensibles/inadecuadas para la edad elegida.
 

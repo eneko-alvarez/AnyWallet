@@ -141,11 +141,12 @@ export async function buildApp(options: BuildAppOptions = {}) {
     .send((request.query.lang ? languageFromHeader(request.query.lang) : languageFromHeader(header(request, "accept-language") ?? "es")) === "en" ? englishPrivacyPage(config.PASS_CONTACT_EMAIL) : `<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Política de privacidad de AnyWallet</title><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#172033}h1,h2{line-height:1.2}</style></head>
-<body><h1>Política de privacidad de AnyWallet</h1><p>Última actualización: 13 de septiembre de 2026.</p>
+<body><h1>Política de privacidad de AnyWallet</h1><p>Última actualización: 17 de septiembre de 2026.</p>
 <h2>Datos tratados</h2><p>Los PDF e imágenes elegidos se analizan localmente en el iPhone y no se suben. Para crear el pase, AnyWallet envía temporalmente al servicio de firma los campos revisados, el color, el tipo de pase y los bytes del código. Las fotos opcionales se comprimen en el dispositivo y se usan solo para incorporarlas al pase.</p>
 <p>El borrador existe en memoria durante un máximo de diez minutos y se elimina al descargar el pase. Su contenido no se usa para publicidad, analítica, perfiles ni seguimiento, y no se comparte con terceros. Las claves públicas de App Attest se mantienen mientras sean necesarias para prevenir abuso; puedes solicitar su eliminación mediante el correo de contacto.</p>
 <h2>Seguridad</h2><p>AnyWallet usa App Attest para comprobar que las solicitudes proceden de una instalación legítima. El servidor conserva la clave pública y el contador criptográfico de la instalación para prevenir abuso y repeticiones. La comunicación usa HTTPS y los pases se firman con un certificado de Apple guardado únicamente en el servidor.</p>
-<h2>Publicidad</h2><p>Esta version de AnyWallet no muestra anuncios ni integra redes publicitarias.</p>
+<h2>Publicidad</h2><p>Las versiones de AnyWallet que incluyen publicidad pueden mostrar un anuncio no personalizado después de añadir correctamente un pase a Apple Wallet. Ver el anuncio nunca es necesario para crear el pase.</p>
+<p>Google AdMob y su plataforma de consentimiento pueden tratar la dirección IP (para estimar la ubicación aproximada), identificadores de la aplicación o del dispositivo, interacciones con anuncios y datos de diagnóstico. Los campos y códigos del pase no se envían a Google para publicidad. Cuando se requiera, la app mostrará un mensaje de consentimiento y un acceso a las opciones de privacidad. Consulta también la <a href="https://policies.google.com/privacy">política de privacidad de Google</a>.</p>
 <h2>Contacto</h2><p>Para consultas de privacidad o solicitudes de acceso y eliminación: <a href="mailto:${config.PASS_CONTACT_EMAIL}">${config.PASS_CONTACT_EMAIL}</a>.</p></body></html>`));
 
   app.get("/app-ads.txt", async (_request, reply) => reply

@@ -6,7 +6,7 @@ El PDF o la imagen se analiza completamente en el iPhone mediante PDFKit y Visio
 
 ## Estructura
 
-- `ios`: aplicación SwiftUI para iOS 17 o posterior. La primera versión no incluye SDK publicitarios.
+- `ios`: aplicación SwiftUI para iOS 17 o posterior. La versión 1.1 incorpora Google AdMob y User Messaging Platform.
 - `server`: API Fastify dedicada exclusivamente a firmar pases.
 
 ## Primer arranque en el Mac
@@ -140,7 +140,7 @@ xcodebuild archive \
 
 Antes de subir a App Store Connect, activa App Attest para el App ID `com.eneko.anywallet`, confirma que el perfil de distribución contiene el entitlement y publica `PRIVACY.md` en una URL HTTPS. Apple exige una URL de política de privacidad y declarar las prácticas de datos en App Store Connect.
 
-La primera versión se archiva sin publicidad mediante `ios/archive-app-store.sh`; las instrucciones completas para el Mac están en `MAC_APP_STORE.md`. La integración futura de AdMob queda desactivada y señalada en el código; consulta `APP_STORE_Y_PRODUCCION.txt` solo cuando prepares esa actualización.
+La versión 1.1 se archiva mediante `ios/archive-app-store.sh`, que exige los identificadores reales de AdMob desde `ios/.env.ads.production` y verifica el contenido del archive. Las instrucciones completas para el Mac están en `MAC_APP_STORE.md`.
 
 La portada está disponible en castellano e inglés y enlaza a la ficha pública de AnyWallet en la App Store: `https://apps.apple.com/us/app/anywallet/id6811444719`. El enlace predeterminado puede cambiarse con `APP_STORE_URL`.
 
