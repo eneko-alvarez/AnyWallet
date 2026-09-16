@@ -1,4 +1,5 @@
 export type PassDraft = {
+  language?: "es" | "en";
   passKind: "travel" | "membership" | "custom";
   title: string;
   issuer: string;

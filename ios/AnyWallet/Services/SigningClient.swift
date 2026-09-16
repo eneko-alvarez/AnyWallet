@@ -26,6 +26,7 @@ actor SigningClient {
         }
         var request = URLRequest(url: creationURL)
         request.httpMethod = "POST"
+        request.setValue(L10n.language, forHTTPHeaderField: "Accept-Language")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = body
         if let keyIdentifier = authorization.keyIdentifier,
@@ -39,7 +40,7 @@ actor SigningClient {
         do {
             (responseData, response) = try await session.data(for: request)
         } catch {
-            throw AnyWalletError.server("No se ha podido conectar con el servicio: \(diagnostic(for: error))")
+            throw AnyWalletError.server(L10n.format("No se ha podido conectar con el servicio: %@", diagnostic(for: error)))
         }
         if let http = response as? HTTPURLResponse,
            http.statusCode == 401,
@@ -48,41 +49,43 @@ actor SigningClient {
             await appAttestClient.invalidateKey()
             return try await createPass(from: draft, canRetryAttestation: false)
         }
-        try validate(response: response, data: responseData, operation: "Crear el pase")
+        try validate(response: response, data: responseData, operation: L10n.text("Crear el pase"))
         let result: PassCreationResponse
         do {
             result = try JSONDecoder().decode(PassCreationResponse.self, from: responseData)
         } catch {
-            throw AnyWalletError.server("Crear el pase: respuesta JSON inválida (\(diagnostic(for: error))).")
+            throw AnyWalletError.server(L10n.format("Crear el pase: respuesta JSON inválida (%@).", diagnostic(for: error)))
         }
         guard let downloadURL = URL(string: result.downloadURL) else {
-            throw AnyWalletError.server("Crear el pase: el servidor devolvió una URL de descarga inválida.")
+            throw AnyWalletError.server(L10n.text("Crear el pase: el servidor devolvió una URL de descarga inválida."))
         }
 
         let passData: Data
         let passResponse: URLResponse
         do {
-            (passData, passResponse) = try await session.data(from: downloadURL)
+            var downloadRequest = URLRequest(url: downloadURL)
+            downloadRequest.setValue(L10n.language, forHTTPHeaderField: "Accept-Language")
+            (passData, passResponse) = try await session.data(for: downloadRequest)
         } catch {
-            throw AnyWalletError.server("No se ha podido descargar el pase: \(diagnostic(for: error))")
+            throw AnyWalletError.server(L10n.format("No se ha podido descargar el pase: %@", diagnostic(for: error)))
         }
-        try validate(response: passResponse, data: passData, operation: "Descargar el pase")
+        try validate(response: passResponse, data: passData, operation: L10n.text("Descargar el pase"))
         guard !passData.isEmpty else {
-            throw AnyWalletError.server("Descargar el pase: el servidor devolvió un archivo vacío.")
+            throw AnyWalletError.server(L10n.text("Descargar el pase: el servidor devolvió un archivo vacío."))
         }
         return passData
     }
 
     private func validate(response: URLResponse, data: Data, operation: String) throws {
         guard let http = response as? HTTPURLResponse else {
-            throw AnyWalletError.server("\(operation): la respuesta no es HTTP.")
+            throw AnyWalletError.server(L10n.format("%@: la respuesta no es HTTP.", operation))
         }
         guard (200..<300).contains(http.statusCode) else {
             let body = try? JSONDecoder().decode(ServerErrorResponse.self, from: data)
             let code = body?.code.map { " · \($0)" } ?? ""
             let details = body?.details?.map { "\($0.field): \($0.message)" }.joined(separator: "; ")
             let detailSuffix = details.map { " · \($0)" } ?? ""
-            let message = body?.message ?? "El servidor no devolvió un mensaje de error."
+            let message = body?.message ?? L10n.text("El servidor no devolvió un mensaje de error.")
             throw AnyWalletError.server("\(operation): HTTP \(http.statusCode)\(code) · \(message)\(detailSuffix)")
         }
     }

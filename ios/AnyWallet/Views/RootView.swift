@@ -25,7 +25,7 @@ struct RootView: View {
             }
 
             if model.isAnalyzing {
-                LoadingOverlay(label: "Analizando el pase")
+                LoadingOverlay(label: L10n.text("Analizando el pase"))
             }
 
             if isLaunching {
@@ -61,15 +61,15 @@ struct RootView: View {
             }
         }
         .alert(
-            "No se ha podido completar la operación",
+            L10n.text("No se ha podido completar la operación"),
             isPresented: Binding(
                 get: { model.errorMessage != nil },
                 set: { if !$0 { model.errorMessage = nil } }
             )
         ) {
-            Button("Aceptar", role: .cancel) { model.errorMessage = nil }
+            Button(L10n.text("Aceptar"), role: .cancel) { model.errorMessage = nil }
         } message: {
-            Text(model.errorMessage ?? "Error desconocido")
+            Text(model.errorMessage ?? L10n.text("Error desconocido"))
         }
         .sheet(item: $model.pendingWalletPass) { pending in
             WalletPassSheet(data: pending.data) { _ in
@@ -101,7 +101,7 @@ private struct LaunchView: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Abriendo AnyWallet")
+        .accessibilityLabel(L10n.text("Abriendo AnyWallet"))
     }
 }
 

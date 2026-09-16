@@ -40,7 +40,7 @@ struct TicketEditorView: View {
                         action: model.createPass
                     )
 
-                    Text("Pase personal. Conserva el archivo original para cualquier comprobación.")
+                    Text(L10n.text("Pase personal. Conserva el archivo original para cualquier comprobación."))
                         .font(.caption)
                         .foregroundStyle(AppTheme.muted)
                         .multilineTextAlignment(.center)
@@ -76,11 +76,11 @@ struct TicketEditorView: View {
                     .foregroundStyle(AppTheme.ink)
                     .frame(width: 40, height: 40)
             }
-            .accessibilityLabel("Volver")
+            .accessibilityLabel(L10n.text("Volver"))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Nuevo pase").font(.headline).foregroundStyle(AppTheme.ink)
-                Text(model.isCustomMode ? "Creado desde cero" : (model.analysis?.filename ?? ""))
+                Text(L10n.text("Nuevo pase")).font(.headline).foregroundStyle(AppTheme.ink)
+                Text(model.isCustomMode ? L10n.text("Creado desde cero") : (model.analysis?.filename ?? ""))
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
                     .lineLimit(1)
@@ -103,8 +103,8 @@ struct TicketEditorView: View {
 
     private var passKindSection: some View {
         VStack(alignment: .leading, spacing: 13) {
-            Text("Tipo de pase").font(.title3.bold()).foregroundStyle(AppTheme.ink)
-            Picker("Tipo de pase", selection: Binding(
+            Text(L10n.text("Tipo de pase")).font(.title3.bold()).foregroundStyle(AppTheme.ink)
+            Picker(L10n.text("Tipo de pase"), selection: Binding(
                 get: { model.passKind },
                 set: model.selectPassKind
             )) {
@@ -118,9 +118,9 @@ struct TicketEditorView: View {
 
     private func barcodeSection(_ candidates: [BarcodeCandidate]) -> some View {
         VStack(alignment: .leading, spacing: 13) {
-            Text("Código").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+            Text(L10n.text("Código")).font(.title3.bold()).foregroundStyle(AppTheme.ink)
             if candidates.isEmpty {
-                Label("Necesitas otro archivo con un código QR o de barras legible.", systemImage: "barcode.viewfinder")
+                Label(L10n.text("Necesitas otro archivo con un código QR o de barras legible."), systemImage: "barcode.viewfinder")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.danger)
                     .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
@@ -147,45 +147,45 @@ struct TicketEditorView: View {
 
     private var fieldsSection: some View {
         VStack(alignment: .leading, spacing: 13) {
-            Text("Datos del pase").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+            Text(L10n.text("Datos del pase")).font(.title3.bold()).foregroundStyle(AppTheme.ink)
             LabeledField(
-                label: "Título",
-                placeholder: model.passKind == .travel ? "Mi billete" : "Mi membresía",
+                label: L10n.text("Título"),
+                placeholder: model.passKind == .travel ? L10n.text("Mi billete") : L10n.text("Mi membresía"),
                 text: $model.fields.title
             )
             if model.passKind == .travel {
                 HStack(alignment: .top, spacing: 10) {
-                    LabeledField(label: "Origen", placeholder: "Origen", text: $model.fields.origin)
-                    LabeledField(label: "Destino", placeholder: "Destino", text: $model.fields.destination)
+                    LabeledField(label: L10n.text("Origen"), placeholder: L10n.text("Origen"), text: $model.fields.origin)
+                    LabeledField(label: L10n.text("Destino"), placeholder: L10n.text("Destino"), text: $model.fields.destination)
                 }
-                DateField(label: "Fecha y hora", pickerLabel: "Fecha del viaje", date: $model.fields.relevantDate)
-                LabeledField(label: "Viajero", placeholder: "Opcional", text: $model.fields.passenger)
+                DateField(label: L10n.text("Fecha y hora"), pickerLabel: L10n.text("Fecha del viaje"), date: $model.fields.relevantDate)
+                LabeledField(label: L10n.text("Viajero"), placeholder: L10n.text("Opcional"), text: $model.fields.passenger)
                 HStack(alignment: .top, spacing: 10) {
-                    LabeledField(label: "Operador", placeholder: "Opcional", text: $model.fields.issuer)
-                    LabeledField(label: "Referencia", placeholder: "Opcional", text: $model.fields.reference)
+                    LabeledField(label: L10n.text("Operador"), placeholder: L10n.text("Opcional"), text: $model.fields.issuer)
+                    LabeledField(label: L10n.text("Referencia"), placeholder: L10n.text("Opcional"), text: $model.fields.reference)
                 }
             } else if model.passKind == .membership {
-                LabeledField(label: "Comercio o programa", placeholder: "Ej. Lidl Plus", text: $model.fields.issuer)
-                LabeledField(label: "Titular", placeholder: "Opcional", text: $model.fields.memberName)
-                LabeledField(label: "Número de socio", placeholder: "Opcional", text: $model.fields.memberNumber)
-                DateField(label: "Fecha de caducidad", pickerLabel: "Caducidad", date: $model.fields.relevantDate)
+                LabeledField(label: L10n.text("Comercio o programa"), placeholder: L10n.text("Ej. Lidl Plus"), text: $model.fields.issuer)
+                LabeledField(label: L10n.text("Titular"), placeholder: L10n.text("Opcional"), text: $model.fields.memberName)
+                LabeledField(label: L10n.text("Número de socio"), placeholder: L10n.text("Opcional"), text: $model.fields.memberNumber)
+                DateField(label: L10n.text("Fecha de caducidad"), pickerLabel: L10n.text("Caducidad"), date: $model.fields.relevantDate)
             } else {
                 customPhotoSection
                 ForEach($model.customFields) { $field in
                     HStack(alignment: .bottom, spacing: 8) {
-                        LabeledField(label: "Etiqueta", placeholder: "Ej. Departamento", text: $field.label)
-                        LabeledField(label: "Valor", placeholder: "Ej. Diseño", text: $field.value)
+                        LabeledField(label: L10n.text("Etiqueta"), placeholder: L10n.text("Ej. Departamento"), text: $field.label)
+                        LabeledField(label: L10n.text("Valor"), placeholder: L10n.text("Ej. Diseño"), text: $field.value)
                         Button(role: .destructive) { model.removeCustomField(id: field.id) } label: {
                             Image(systemName: "trash")
                                 .frame(width: 42, height: 48)
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(AppTheme.danger)
-                        .accessibilityLabel("Eliminar campo")
+                        .accessibilityLabel(L10n.text("Eliminar campo"))
                     }
                 }
                 Button(action: model.addCustomField) {
-                    Label("Añadir campo", systemImage: "plus.circle")
+                    Label(L10n.text("Añadir campo"), systemImage: "plus.circle")
                         .font(.subheadline.weight(.semibold))
                 }
                 .disabled(model.customFields.count >= 4)
@@ -197,8 +197,8 @@ struct TicketEditorView: View {
         let photoData = model.customPhotoData
         let hasPhoto = photoData != nil
         return VStack(alignment: .leading, spacing: 10) {
-            Text("IMAGEN (OPCIONAL)").font(.caption2.bold()).foregroundStyle(AppTheme.muted)
-            Picker("Proporción", selection: $model.photoAspect) {
+            Text(L10n.text("IMAGEN (OPCIONAL)")).font(.caption2.bold()).foregroundStyle(AppTheme.muted)
+            Picker(L10n.text("Proporción"), selection: $model.photoAspect) {
                 ForEach(PhotoAspect.allCases) { aspect in Text(aspect.title).tag(aspect) }
             }
             .pickerStyle(.segmented)
@@ -214,12 +214,12 @@ struct TicketEditorView: View {
                 }
                 VStack(alignment: .leading, spacing: 8) {
                     PhotosPicker(selection: $selectedCustomPhoto, matching: .images) {
-                        Label(hasPhoto ? "Cambiar foto" : "Elegir foto", systemImage: "photo")
+                        Label(hasPhoto ? L10n.text("Cambiar foto") : L10n.text("Elegir foto"), systemImage: "photo")
                     }
                     if hasPhoto {
-                        Button("Quitar", role: .destructive) { model.customPhotoData = nil }
+                        Button(L10n.text("Quitar"), role: .destructive) { model.customPhotoData = nil }
                     }
-                    Text("Se comprime en el iPhone y el servidor solo la mantiene en memoria mientras firma.")
+                    Text(L10n.text("Se comprime en el iPhone y el servidor solo la mantiene en memoria mientras firma."))
                         .font(.caption2)
                         .foregroundStyle(AppTheme.muted)
                 }
@@ -233,9 +233,9 @@ struct TicketEditorView: View {
     private var customBarcodeSection: some View {
         VStack(alignment: .leading, spacing: 13) {
             HStack {
-                Text("Código opcional").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+                Text(L10n.text("Código opcional")).font(.title3.bold()).foregroundStyle(AppTheme.ink)
                 Spacer()
-                Picker("Formato", selection: $model.customBarcodeFormat) {
+                Picker(L10n.text("Formato"), selection: $model.customBarcodeFormat) {
                     ForEach([BarcodeFormat.qr, .code128, .pdf417, .aztec], id: \.rawValue) { format in
                         Text(format.title).tag(format)
                     }
@@ -243,16 +243,16 @@ struct TicketEditorView: View {
                 .pickerStyle(.menu)
             }
             LabeledField(
-                label: "Contenido",
-                placeholder: "Texto, número o URL",
+                label: L10n.text("Contenido"),
+                placeholder: L10n.text("Texto, número o URL"),
                 text: $model.customBarcodeValue
             )
-            Text("Déjalo vacío si tu pase no necesita código.")
+            Text(L10n.text("Déjalo vacío si tu pase no necesita código."))
                 .font(.caption)
                 .foregroundStyle(AppTheme.muted)
             if !model.customBarcodeValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                model.selectedBarcode == nil {
-                Text("El contenido no es compatible con el formato elegido.")
+                Text(L10n.text("El contenido no es compatible con el formato elegido."))
                     .font(.caption)
                     .foregroundStyle(AppTheme.danger)
             }
@@ -261,7 +261,7 @@ struct TicketEditorView: View {
 
     private var colorSection: some View {
         VStack(alignment: .leading, spacing: 13) {
-            Text("Color").font(.title3.bold()).foregroundStyle(AppTheme.ink)
+            Text(L10n.text("Color")).font(.title3.bold()).foregroundStyle(AppTheme.ink)
             HStack(spacing: 13) {
                 ForEach(PassColor.choices) { option in
                     Button {
@@ -354,7 +354,7 @@ private struct BarcodeChoice: View {
                     .frame(width: 82, height: 70)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(candidate.format.title) \(index + 1)").font(.subheadline.bold()).foregroundStyle(AppTheme.ink)
-                    Text("Página \(candidate.page) · \(candidate.byteLength) bytes")
+                    Text(L10n.format("Página %d · %d bytes", candidate.page, candidate.byteLength))
                         .font(.caption2).foregroundStyle(AppTheme.muted)
                     if let value = candidate.readableValue {
                         Text(value).font(.caption2).foregroundStyle(AppTheme.muted).lineLimit(1)
@@ -410,7 +410,7 @@ private struct AddToWalletButton: View {
                         .scaledToFit()
                         .frame(width: 32, height: 32)
                 }
-                Text(isLoading ? "Preparando pase…" : "Añadir a Apple Wallet")
+                Text(isLoading ? L10n.text("Preparando pase…") : L10n.text("Añadir a Apple Wallet"))
                     .font(.system(size: 17, weight: .semibold))
             }
             .foregroundStyle(.white)
@@ -420,6 +420,6 @@ private struct AddToWalletButton: View {
         .buttonStyle(.plain)
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.45 : 1)
-        .accessibilityLabel(isLoading ? "Preparando pase" : "Añadir a Apple Wallet")
+        .accessibilityLabel(isLoading ? L10n.text("Preparando pase") : L10n.text("Añadir a Apple Wallet"))
     }
 }

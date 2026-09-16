@@ -68,7 +68,7 @@ final class AppViewModel: ObservableObject {
         }
     }
 
-    func importImage(data: Data, filename: String = "captura.png") {
+    func importImage(data: Data, filename: String = L10n.text("captura.png")) {
         isAnalyzing = true
         errorMessage = nil
 
@@ -146,7 +146,7 @@ final class AppViewModel: ObservableObject {
                 } catch {
                     let error = error as NSError
                     throw AnyWalletError.server(
-                        "Validar en Wallet: \(error.domain) \(error.code) · \(error.localizedDescription)"
+                        L10n.format("Validar en Wallet: %@ %d · %@", error.domain, error.code, error.localizedDescription)
                     )
                 }
                 pendingWalletPass = PendingWalletPass(data: data)
@@ -176,16 +176,16 @@ final class AppViewModel: ObservableObject {
         reset()
         isCustomMode = true
         passKind = .custom
-        fields.title = "Mi pase"
+        fields.title = L10n.text("Mi pase")
         customFields = [
-            CustomPassField(label: "Nombre", value: ""),
-            CustomPassField(label: "Identificador", value: ""),
+            CustomPassField(label: L10n.text("Nombre"), value: ""),
+            CustomPassField(label: L10n.text("Identificador"), value: ""),
         ]
     }
 
     func addCustomField() {
         guard customFields.count < 4 else { return }
-        customFields.append(CustomPassField(label: "Campo \(customFields.count + 1)", value: ""))
+        customFields.append(CustomPassField(label: L10n.format("Campo %d", customFields.count + 1), value: ""))
     }
 
     func removeCustomField(id: UUID) {

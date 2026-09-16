@@ -96,13 +96,13 @@ actor TicketAnalyzer {
         }
         var warnings: [String] = []
         if sortedCandidates.isEmpty {
-            warnings.append("No se ha detectado ningún código QR o de barras compatible en el archivo.")
+            warnings.append(L10n.text("No se ha detectado ningún código QR o de barras compatible en el archivo."))
         }
         if sortedCandidates.count > 1 {
-            warnings.append("Hay varios códigos. Revisa y elige el que identifica el pase.")
+            warnings.append(L10n.text("Hay varios códigos. Revisa y elige el que identifica el pase."))
         }
         if combinedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            warnings.append("No se ha podido extraer texto. Completa los datos manualmente.")
+            warnings.append(L10n.text("No se ha podido extraer texto. Completa los datos manualmente."))
         }
 
         let fields = FieldExtractor.extract(filename: filename, text: combinedText)

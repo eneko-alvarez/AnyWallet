@@ -56,7 +56,14 @@ describe("API", () => {
     expect(response.headers["content-type"]).toContain("text/html");
     expect(response.body).toContain("no muestra anuncios");
     expect(response.body).not.toMatch(/AdMob|Google Mobile Ads|User Messaging Platform/);
-    expect((await app.inject({ method: "GET", url: "/app-ads.txt" })).statusCode).toBe(404);
+  });
+
+  it("publishes the AdMob ownership record as plain text", async () => {
+    app = await buildApp();
+    const response = await app.inject({ method: "GET", url: "/app-ads.txt" });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/plain");
+    expect(response.body).toBe("google.com, pub-3290168130965932, DIRECT, f08c47fec0942fa0\n");
   });
 
   it("links the download button to the configured App Store listing", () => {

@@ -6,6 +6,7 @@ struct AnyWalletApp: App {
         WindowGroup {
             RootView()
                 .preferredColorScheme(.light)
+                .environment(\.locale, L10n.locale)
         }
     }
 }

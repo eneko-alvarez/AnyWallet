@@ -32,7 +32,7 @@ actor AppAttestClient {
             return (try payloadBuilder(challenge), Authorization(challenge: challenge, keyIdentifier: nil, assertion: nil))
         }
         guard baseURL.scheme == "https" else {
-            throw AnyWalletError.server("La conexión segura con el servicio no está configurada.")
+            throw AnyWalletError.server(L10n.text("La conexión segura con el servicio no está configurada."))
         }
         let keyIdentifier = try await registeredKeyIdentifier()
         let challenge = try await requestChallenge()
@@ -60,7 +60,7 @@ actor AppAttestClient {
             return keyIdentifier
         }
         guard service.isSupported else {
-            throw AnyWalletError.server("Este dispositivo no permite verificar la integridad de la app.")
+            throw AnyWalletError.server(L10n.text("Este dispositivo no permite verificar la integridad de la app."))
         }
 
         let challenge = try await requestChallenge()
@@ -78,7 +78,7 @@ actor AppAttestClient {
         request.httpBody = body
         let (_, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 204 else {
-            throw AnyWalletError.server("No se ha podido verificar esta instalación de la app.")
+            throw AnyWalletError.server(L10n.text("No se ha podido verificar esta instalación de la app."))
         }
         UserDefaults.standard.set(keyIdentifier, forKey: keyDefaultsKey)
         return keyIdentifier
@@ -90,7 +90,7 @@ actor AppAttestClient {
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200,
               let challenge = try? JSONDecoder().decode(ChallengeResponse.self, from: data).challenge else {
-            throw AnyWalletError.server("No se ha podido iniciar la conexión segura con el servicio.")
+            throw AnyWalletError.server(L10n.text("No se ha podido iniciar la conexión segura con el servicio."))
         }
         return challenge
     }
@@ -98,7 +98,7 @@ actor AppAttestClient {
     private func randomChallenge() throws -> String {
         var bytes = [UInt8](repeating: 0, count: 32)
         guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else {
-            throw AnyWalletError.server("No se ha podido preparar la solicitud.")
+            throw AnyWalletError.server(L10n.text("No se ha podido preparar la solicitud."))
         }
         return Data(bytes).base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")

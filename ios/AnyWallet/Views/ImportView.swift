@@ -26,12 +26,12 @@ struct ImportView: View {
                     .accessibilityHidden(true)
 
                 VStack(spacing: 10) {
-                    Text("Crea tu próximo pase.")
+                    Text(L10n.text("Crea tu próximo pase."))
                         .font(.system(size: 34, weight: .bold))
                         .foregroundStyle(AppTheme.ink)
                         .multilineTextAlignment(.center)
 
-                    Text("Billetes y tarjetas, listos para Apple Wallet.")
+                    Text(L10n.text("Billetes y tarjetas, listos para Apple Wallet."))
                         .font(.system(size: 17))
                         .foregroundStyle(AppTheme.muted)
                         .multilineTextAlignment(.center)
@@ -51,7 +51,7 @@ struct ImportView: View {
                             Image(systemName: "plus")
                                 .fontWeight(.semibold)
                         }
-                        Text(isAnalyzing ? "Analizando…" : "Crear pase")
+                        Text(isAnalyzing ? L10n.text("Analizando…") : L10n.text("Crear pase"))
                             .font(.system(size: 17, weight: .semibold))
                     }
                     .foregroundStyle(.white)
@@ -62,7 +62,7 @@ struct ImportView: View {
                 .disabled(isAnalyzing)
 
                 Button(action: onCreateCustom) {
-                    Label("Crear desde cero", systemImage: "slider.horizontal.3")
+                    Label(L10n.text("Crear desde cero"), systemImage: "slider.horizontal.3")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(AppTheme.ink)
                         .frame(maxWidth: .infinity, minHeight: 52)
@@ -72,11 +72,11 @@ struct ImportView: View {
                 .buttonStyle(.plain)
                 .disabled(isAnalyzing)
 
-                Label("El archivo se analiza en este iPhone", systemImage: "lock.fill")
+                Label(L10n.text("El archivo se analiza en este iPhone"), systemImage: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(AppTheme.muted)
 
-                Link("Política de privacidad", destination: URL(string: "https://anywallet.topitup.party/privacy")!)
+                Link(L10n.text("Política de privacidad"), destination: URL(string: "https://anywallet.topitup.party/privacy?lang=\(L10n.language)")!)
                     .font(.footnote)
                     .foregroundStyle(AppTheme.muted)
             }
@@ -86,13 +86,13 @@ struct ImportView: View {
         .padding(.bottom, 24)
         .background(Color.white.ignoresSafeArea())
         .confirmationDialog(
-            "Seleccionar origen",
+            L10n.text("Seleccionar origen"),
             isPresented: $isSourceDialogPresented,
             titleVisibility: .visible
         ) {
-            Button("Foto de un billete o tarjeta") { isPhotoPickerPresented = true }
-            Button("PDF o imagen desde Archivos") { onImportFile() }
-            Button("Cancelar", role: .cancel) {}
+            Button(L10n.text("Foto de un billete o tarjeta")) { isPhotoPickerPresented = true }
+            Button(L10n.text("PDF o imagen desde Archivos")) { onImportFile() }
+            Button(L10n.text("Cancelar"), role: .cancel) {}
         }
         .photosPicker(
             isPresented: $isPhotoPickerPresented,

@@ -10,9 +10,9 @@ enum PassKind: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .travel: "Viaje"
-        case .membership: "Membresía"
-        case .custom: "Personalizado"
+        case .travel: L10n.text("Viaje")
+        case .membership: L10n.text("Membresía")
+        case .custom: L10n.text("Personalizado")
         }
     }
 }
@@ -179,14 +179,14 @@ enum AnyWalletError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidDocument: "El archivo no es un PDF o una imagen válida."
-        case .fileTooLarge: "El archivo supera el límite de 15 MB."
-        case .tooManyPages: "El PDF supera el límite de 12 páginas."
-        case .passwordProtected: "El PDF está protegido con contraseña."
-        case .noBarcode: "No se ha encontrado un código compatible legible."
-        case .invalidServerResponse: "La respuesta del servidor no es válida."
-        case .walletUnavailable: "Este dispositivo no permite añadir pases a Wallet."
-        case .invalidPass: "Apple Wallet ha rechazado el pase firmado."
+        case .invalidDocument: L10n.text("El archivo no es un PDF o una imagen válida.")
+        case .fileTooLarge: L10n.text("El archivo supera el límite de 15 MB.")
+        case .tooManyPages: L10n.text("El PDF supera el límite de 12 páginas.")
+        case .passwordProtected: L10n.text("El PDF está protegido con contraseña.")
+        case .noBarcode: L10n.text("No se ha encontrado un código compatible legible.")
+        case .invalidServerResponse: L10n.text("La respuesta del servidor no es válida.")
+        case .walletUnavailable: L10n.text("Este dispositivo no permite añadir pases a Wallet.")
+        case .invalidPass: L10n.text("Apple Wallet ha rechazado el pase firmado.")
         case .server(let message): message
         }
     }

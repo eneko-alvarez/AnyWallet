@@ -33,13 +33,13 @@ struct PassPreviewView: View {
 
                 if passKind == .travel {
                     HStack(alignment: .bottom, spacing: 10) {
-                        place(label: "ORIGEN", value: fields.origin, isTrailing: false)
+                        place(label: L10n.text("ORIGEN"), value: fields.origin, isTrailing: false)
                         Image(systemName: "location.fill").font(.footnote).foregroundStyle(.white.opacity(0.82))
-                        place(label: "DESTINO", value: fields.destination, isTrailing: true)
+                        place(label: L10n.text("DESTINO"), value: fields.destination, isTrailing: true)
                     }
                     .padding(.bottom, 19)
                 } else if passKind == .membership {
-                    place(label: "PROGRAMA", value: fields.issuer, isTrailing: false)
+                    place(label: L10n.text("PROGRAMA"), value: fields.issuer, isTrailing: false)
                         .padding(.bottom, 19)
                 } else {
                     HStack(alignment: .top, spacing: 14) {
@@ -94,18 +94,18 @@ struct PassPreviewView: View {
 
     private var primaryDetail: String {
         if passKind == .custom {
-            return customFields.dropFirst(2).first?.value.nonEmpty ?? "Pase personal"
+            return customFields.dropFirst(2).first?.value.nonEmpty ?? L10n.text("Pase personal")
         }
         if passKind == .membership {
-            return fields.memberName.isEmpty ? "Sin titular" : fields.memberName
+            return fields.memberName.isEmpty ? L10n.text("Sin titular") : fields.memberName
         }
-        return fields.relevantDate?.formatted(date: .abbreviated, time: .shortened) ?? "Sin fecha"
+        return fields.relevantDate?.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(L10n.locale)) ?? L10n.text("Sin fecha")
     }
 
     private var secondaryDetail: String {
         if passKind == .custom { return customFields.dropFirst(3).first?.value ?? "" }
         if passKind == .membership {
-            return fields.memberNumber.isEmpty ? "" : "N.º \(fields.memberNumber)"
+            return fields.memberNumber.isEmpty ? "" : L10n.format("N.º %@", fields.memberNumber)
         }
         return fields.passenger
     }
@@ -120,17 +120,17 @@ struct PassPreviewView: View {
 
     private var kindLabel: String {
         switch passKind {
-        case .travel: "BILLETE PERSONAL"
-        case .membership: "TARJETA DE MEMBRESÍA"
-        case .custom: "PASE PERSONALIZADO"
+        case .travel: L10n.text("BILLETE PERSONAL")
+        case .membership: L10n.text("TARJETA DE MEMBRESÍA")
+        case .custom: L10n.text("PASE PERSONALIZADO")
         }
     }
 
     private var detailLabel: String {
         switch passKind {
-        case .travel: "FECHA Y HORA"
-        case .membership: "TITULAR"
-        case .custom: customFields.dropFirst(2).first?.label.uppercased() ?? "DETALLE"
+        case .travel: L10n.text("FECHA Y HORA")
+        case .membership: L10n.text("TITULAR")
+        case .custom: customFields.dropFirst(2).first?.label.uppercased() ?? L10n.text("DETALLE")
         }
     }
 

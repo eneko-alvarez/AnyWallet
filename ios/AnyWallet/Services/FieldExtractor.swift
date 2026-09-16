@@ -47,7 +47,7 @@ enum FieldExtractor {
         let fallback = (filename as NSString).deletingPathExtension
             .replacingOccurrences(of: "[_-]+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return fallback.isEmpty ? "Mi billete" : fallback
+        return fallback.isEmpty ? L10n.text("Mi billete") : fallback
     }
 
     private static func value(in text: String, labels: [String]) -> String {

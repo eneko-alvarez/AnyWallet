@@ -80,16 +80,18 @@ Nunca usar el ad unit real en simulador o durante pruebas internas repetitivas. 
 
 5. APP-ADS.TXT
 
-Desde AdMob, copiar la línea exacta de app-ads.txt. Normalmente tendrá esta forma:
+AdMob ha proporcionado esta línea para la cuenta de AnyWallet:
 
-google.com, pub-TU_PUBLISHER_ID, DIRECT, f08c47fec0942fa0
+google.com, pub-3290168130965932, DIRECT, f08c47fec0942fa0
 
-Configurar esa línea como APP_ADS_TXT en server/.env.production. El backend la publica en:
+El backend la publica en:
 https://anywallet.topitup.party/app-ads.txt
 
 Usar https://anywallet.topitup.party como Developer Website en App Store Connect.
 
-Debe devolver HTTP 200, text/plain y sin login. Apps de AdMob creadas desde enero de 2025 tienen servicio limitado si no se verifica la propiedad mediante app-ads.txt.
+Tras desplegar el backend, debe devolver HTTP 200, text/plain y sin login.
+En AdMob, pulsar "Comprobar si hay actualizaciones" para repetir la verificación.
+Apps de AdMob creadas desde enero de 2025 tienen servicio limitado si no se verifica la propiedad mediante app-ads.txt.
 
 6. PRIVACIDAD Y APP STORE CONNECT
 

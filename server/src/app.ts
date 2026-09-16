@@ -1,3 +1,5 @@
+import { englishPrivacyPage } from "./privacy.js";
+import { languageFromHeader, translate } from "./localization.js";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import Fastify, { LogController, type FastifyRequest } from "fastify";
@@ -101,6 +103,13 @@ export async function buildApp(options: BuildAppOptions = {}) {
       return reply.code(400).send({ code: "HTTPS_REQUIRED", message: "HTTPS es obligatorio." });
     }
   });
+  app.addHook("preSerialization", async (request, _reply, payload) => {
+    if (payload && typeof payload === "object" && "message" in payload && typeof payload.message === "string") {
+      const language = header(request, "accept-language") ? languageFromHeader(header(request, "accept-language")) : "es";
+      return { ...payload, message: translate(payload.message, language) };
+    }
+    return payload;
+  });
   app.addHook("onSend", async (request, reply, payload) => {
     reply.header("Cache-Control", request.url === "/brand-mark.png" || request.url === "/favicon.png"
       ? "public, max-age=86400"
@@ -125,9 +134,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
     .type("image/png")
     .send(brandMark));
 
-  app.get("/privacy", async (_request, reply) => reply
+  app.get<{ Querystring: { lang?: string } }>("/privacy", async (request, reply) => reply
     .type("text/html; charset=utf-8")
-    .send(`<!doctype html>
+    .send((request.query.lang ? languageFromHeader(request.query.lang) : languageFromHeader(header(request, "accept-language") ?? "es")) === "en" ? englishPrivacyPage(config.PASS_CONTACT_EMAIL) : `<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Política de privacidad de AnyWallet</title><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#172033}h1,h2{line-height:1.2}</style></head>
 <body><h1>Política de privacidad de AnyWallet</h1><p>Última actualización: 13 de septiembre de 2026.</p>
@@ -137,7 +146,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
 <h2>Publicidad</h2><p>Esta version de AnyWallet no muestra anuncios ni integra redes publicitarias.</p>
 <h2>Contacto</h2><p>Para consultas de privacidad o solicitudes de acceso y eliminación: <a href="mailto:${config.PASS_CONTACT_EMAIL}">${config.PASS_CONTACT_EMAIL}</a>.</p></body></html>`));
 
-  // Publicidad futura: reactivar /app-ads.txt con APP_ADS_TXT al crear AdMob.
+  app.get("/app-ads.txt", async (_request, reply) => reply
+    .type("text/plain; charset=utf-8")
+    .send("google.com, pub-3290168130965932, DIRECT, f08c47fec0942fa0\n"));
 
   app.get("/support", async (_request, reply) => reply
     .type("text/html; charset=utf-8")
@@ -202,7 +213,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
       }
     }
 
-    const draft = parsed.data.draft;
+    const draft: PassDraft = { ...parsed.data.draft, language: header(request, "accept-language") ? languageFromHeader(header(request, "accept-language")) : "es" };
     const barcodeBytes = draft.barcodePayloadBase64 ? Buffer.from(draft.barcodePayloadBase64, "base64") : undefined;
     const hasCompleteBarcode = Boolean(draft.barcodeFormat && barcodeBytes?.byteLength);
     if ((draft.passKind !== "custom" && !hasCompleteBarcode) ||

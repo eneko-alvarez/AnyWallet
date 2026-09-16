@@ -1,3 +1,4 @@
+import { translate } from "./localization.js";
 import { randomUUID, createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -12,6 +13,7 @@ export function signingIsConfigured(): boolean {
 }
 
 export function buildPassMetadata(draft: PassDraft, serialNumber: string = randomUUID()) {
+  const t = (text: string) => translate(text, draft.language ?? "es");
   const relevantDate = draft.relevantDate ? new Date(draft.relevantDate).toISOString() : undefined;
   const common = {
     formatVersion: 1 as const,
@@ -32,13 +34,13 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
       ...common,
       generic: {
         headerFields: visible[0] ? [{ key: "custom0", label: visible[0].label, value: visible[0].value }] : [],
-        primaryFields: [{ key: "title", label: "PASE PERSONAL", value: draft.title }],
+        primaryFields: [{ key: "title", label: t("PASE PERSONAL"), value: draft.title }],
         secondaryFields: visible.slice(1, 3).map((field, index) => ({ key: `custom${index + 1}`, label: field.label, value: field.value })),
         auxiliaryFields: visible.slice(3).map((field, index) => ({ key: `custom${index + 3}`, label: field.label, value: field.value })),
         backFields: [
           ...visible.map((field, index) => ({ key: `detail${index}`, label: field.label, value: field.value })),
-          { key: "notice", label: "Aviso", value: "Pase personal creado por el usuario. AnyWallet únicamente firma y entrega el pase." },
-          { key: "contact", label: "Emisor del pase", value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
+          { key: "notice", label: t("Aviso"), value: t("Pase personal creado por el usuario. AnyWallet únicamente firma y entrega el pase.") },
+          { key: "contact", label: t("Emisor del pase"), value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
         ],
       },
     };
@@ -49,18 +51,18 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
       ...common,
       expirationDate: relevantDate,
       storeCard: {
-        headerFields: draft.memberNumber ? [{ key: "memberNumber", label: "N.º DE SOCIO", value: draft.memberNumber }] : [],
-        primaryFields: [{ key: "title", label: "MEMBRESÍA", value: draft.title }],
-        secondaryFields: draft.issuer ? [{ key: "issuer", label: "PROGRAMA", value: draft.issuer }] : [],
-        auxiliaryFields: draft.memberName ? [{ key: "memberName", label: "TITULAR", value: draft.memberName }] : [],
+        headerFields: draft.memberNumber ? [{ key: "memberNumber", label: t("N.º DE SOCIO"), value: draft.memberNumber }] : [],
+        primaryFields: [{ key: "title", label: t("MEMBRESÍA"), value: draft.title }],
+        secondaryFields: draft.issuer ? [{ key: "issuer", label: t("PROGRAMA"), value: draft.issuer }] : [],
+        auxiliaryFields: draft.memberName ? [{ key: "memberName", label: t("TITULAR"), value: draft.memberName }] : [],
         backFields: [
-          ...(draft.issuer ? [{ key: "issuerDetail", label: "Comercio o programa original", value: draft.issuer }] : []),
+          ...(draft.issuer ? [{ key: "issuerDetail", label: t("Comercio o programa original"), value: draft.issuer }] : []),
           {
             key: "notice",
-            label: "Aviso",
-            value: "Pase personal creado a partir de una tarjeta del usuario. No está emitido ni respaldado por el comercio original.",
+            label: t("Aviso"),
+            value: t("Pase personal creado a partir de una tarjeta del usuario. No está emitido ni respaldado por el comercio original."),
           },
-          { key: "contact", label: "Emisor del pase", value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
+          { key: "contact", label: t("Emisor del pase"), value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
         ],
       },
     };
@@ -71,24 +73,24 @@ export function buildPassMetadata(draft: PassDraft, serialNumber: string = rando
     relevantDate,
     relevantDates: relevantDate ? [{ relevantDate }] : undefined,
     generic: {
-      headerFields: draft.reference ? [{ key: "reference", label: "REFERENCIA", value: draft.reference }] : [],
-      primaryFields: [{ key: "title", label: "BILLETE", value: draft.title }],
+      headerFields: draft.reference ? [{ key: "reference", label: t("REFERENCIA"), value: draft.reference }] : [],
+      primaryFields: [{ key: "title", label: t("BILLETE"), value: draft.title }],
       secondaryFields: [
-        ...(draft.origin ? [{ key: "origin", label: "ORIGEN", value: draft.origin }] : []),
-        ...(draft.destination ? [{ key: "destination", label: "DESTINO", value: draft.destination }] : []),
+        ...(draft.origin ? [{ key: "origin", label: t("ORIGEN"), value: draft.origin }] : []),
+        ...(draft.destination ? [{ key: "destination", label: t("DESTINO"), value: draft.destination }] : []),
       ],
       auxiliaryFields: [
-        ...(relevantDate ? [{ key: "date", label: "FECHA", value: relevantDate, dateStyle: "PKDateStyleMedium", timeStyle: "PKDateStyleShort" }] : []),
-        ...(draft.passenger ? [{ key: "passenger", label: "VIAJERO", value: draft.passenger }] : []),
+        ...(relevantDate ? [{ key: "date", label: t("FECHA"), value: relevantDate, dateStyle: "PKDateStyleMedium", timeStyle: "PKDateStyleShort" }] : []),
+        ...(draft.passenger ? [{ key: "passenger", label: t("VIAJERO"), value: draft.passenger }] : []),
       ],
       backFields: [
-        ...(draft.issuer ? [{ key: "issuer", label: "Operador original", value: draft.issuer }] : []),
+        ...(draft.issuer ? [{ key: "issuer", label: t("Operador original"), value: draft.issuer }] : []),
         {
           key: "notice",
-          label: "Aviso",
-          value: "Pase personal creado a partir de un documento del usuario. No está emitido ni respaldado por el operador original. Conserva el PDF original.",
+          label: t("Aviso"),
+          value: t("Pase personal creado a partir de un documento del usuario. No está emitido ni respaldado por el operador original. Conserva el PDF original."),
         },
-        { key: "contact", label: "Emisor del pase", value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
+        { key: "contact", label: t("Emisor del pase"), value: `${config.PASS_ORGANIZATION_NAME} · ${config.PASS_CONTACT_EMAIL}` },
       ],
     },
   };
