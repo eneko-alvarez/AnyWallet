@@ -169,6 +169,7 @@ function signManifest(manifest: Buffer): Promise<Buffer> {
     const stderr: Buffer[] = [];
     child.stdout.on("data", (chunk: Buffer) => stdout.push(chunk));
     child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk));
+    child.stdin.on("error", reject);
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolve(Buffer.concat(stdout));

@@ -266,8 +266,8 @@ export async function buildApp(options: BuildAppOptions = {}) {
         .header("Content-Type", "application/vnd.apple.pkpass")
         .header("Content-Disposition", 'attachment; filename="anywallet.pkpass"')
         .send(pass);
-    } catch {
-      request.log.error("Pass generation failed");
+    } catch (err) {
+      request.log.error({ err }, "Pass generation failed");
       return reply.code(500).send({ code: "PASS_FAILED", message: "No se ha podido firmar el pase." });
     }
   });

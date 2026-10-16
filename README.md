@@ -97,6 +97,8 @@ curl http://localhost:8787/health
 
 El health check público devuelve únicamente `{ "ok": true }`; no revela si los certificados están configurados. El API tampoco simula un pase válido cuando faltan credenciales de firma.
 
+Las pruebas de firma requieren `openssl` y usan certificados temporales de prueba: descargan los tres tipos de pase, comprueban las imágenes y el manifiesto, y verifican la firma criptográfica. La aceptación final en Wallet requiere también certificados Apple reales y un iPhone.
+
 ## Despliegue público seguro
 
 La imagen de producción se construye desde la raíz del repositorio:
@@ -127,6 +129,8 @@ PASS_SIGNER_KEY_PASSPHRASE=GESTOR_DE_SECRETOS
 ```
 
 El puerto `8787` no debe quedar expuesto directamente a Internet; solo el proxy HTTPS debe alcanzarlo. Mantén una sola réplica hasta mover también los borradores temporales a un almacén compartido.
+
+Conserva `init: true` en Docker Compose para recoger procesos huérfanos. Sin él pueden acumularse procesos zombis hasta agotar `pids_limit`, impidiendo generar las imágenes del pase aunque `/health` responda. El healthcheck ejecuta Node directamente y termina en un máximo de dos segundos. Al modificar esta configuración hay que recrear el contenedor; reiniciarlo no aplica los cambios de Compose.
 
 El target Release ya usa `https://anywallet.topitup.party`. Puedes sobrescribirlo al archivar si cambia el dominio:
 

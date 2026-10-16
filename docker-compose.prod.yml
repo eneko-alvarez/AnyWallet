@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
     image: anywallet-api:${ANYWALLET_IMAGE_TAG:-latest}
     container_name: anywallet_api
+    init: true
     restart: unless-stopped
     env_file:
       - server/.env.production
